@@ -252,33 +252,33 @@ $out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceTyp
 $out | Foreach-Object { 
   [PSCustomObject]@{
     Name = $_.identifier
-    'Supp. RBAC' = $_.data.additionalParameters.name -contains 'roleAssignments' 
-    'Supp. Diag. Sett.' = $_.data.additionalParameters.name -contains 'diagnosticWorkspaceId' 
-    'Supp. Pvt Endp.' = $_.data.additionalParameters.name -contains 'privateEndpoints' 
-    'Supp. Lock' = $_.data.additionalParameters.name -contains 'lock' 
+    'RBAC' = $_.data.additionalParameters.name -contains 'roleAssignments' 
+    'Diagnostic Settings' = $_.data.additionalParameters.name -contains 'diagnosticWorkspaceId' 
+    'Private Endpoints' = $_.data.additionalParameters.name -contains 'privateEndpoints' 
+    'Lock' = $_.data.additionalParameters.name -contains 'lock' 
   }
 } | Sort-Object -Property 'Name' | Format-Table
 
 # Returns:
 # --------
-# Name                                                                           Supp. RBAC Supp. Diag. Sett. Supp. Pvt Endp. Supp. Lock
-# ----                                                                           ---------- ----------------- --------------- ----------
-# Microsoft.Storage/storageAccounts                                                    True              True            True       True
-# Microsoft.Storage/storageAccounts/blobServices                                       True              True           False      False
-# Microsoft.Storage/storageAccounts/blobServices/containers                            True             False           False      False
-# Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies      False             False           False      False
-# Microsoft.Storage/storageAccounts/encryptionScopes                                  False             False            True      False
-# Microsoft.Storage/storageAccounts/fileServices                                      False              True           False      False
-# Microsoft.Storage/storageAccounts/fileServices/shares                               False             False           False      False
-# Microsoft.Storage/storageAccounts/inventoryPolicies                                 False             False            True      False
-# Microsoft.Storage/storageAccounts/localUsers                                        False             False            True      False
-# Microsoft.Storage/storageAccounts/managementPolicies                                False             False            True      False
-# Microsoft.Storage/storageAccounts/objectReplicationPolicies                          True             False            True      False
-# Microsoft.Storage/storageAccounts/privateEndpointConnections                        False             False            True      False
-# Microsoft.Storage/storageAccounts/queueServices                                      True              True           False      False
-# Microsoft.Storage/storageAccounts/queueServices/queues                               True             False           False      False
-# Microsoft.Storage/storageAccounts/tableServices                                      True              True           False      False
-# Microsoft.Storage/storageAccounts/tableServices/tables                               True             False           False      False
+# Name                                                                            RBAC Diagnostic Settings Private Endpoints Locks
+# ----                                                                            ---- ------------------- ----------------- -----
+# Microsoft.Storage/storageAccounts                                               True                True              True  True
+# Microsoft.Storage/storageAccounts/blobServices                                  True                True             False False
+# Microsoft.Storage/storageAccounts/blobServices/containers                       True               False             False False
+# Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies False               False             False False
+# Microsoft.Storage/storageAccounts/encryptionScopes                             False               False              True False
+# Microsoft.Storage/storageAccounts/fileServices                                 False                True             False False
+# Microsoft.Storage/storageAccounts/fileServices/shares                          False               False             False False
+# Microsoft.Storage/storageAccounts/inventoryPolicies                            False               False              True False
+# Microsoft.Storage/storageAccounts/localUsers                                   False               False              True False
+# Microsoft.Storage/storageAccounts/managementPolicies                           False               False              True False
+# Microsoft.Storage/storageAccounts/objectReplicationPolicies                     True               False              True False
+# Microsoft.Storage/storageAccounts/privateEndpointConnections                   False               False              True False
+# Microsoft.Storage/storageAccounts/queueServices                                 True                True             False False
+# Microsoft.Storage/storageAccounts/queueServices/queues                          True               False             False False
+# Microsoft.Storage/storageAccounts/tableServices                                 True                True             False False
+# Microsoft.Storage/storageAccounts/tableServices/tables                          True               False             False False
 ```
 
 # In scope
