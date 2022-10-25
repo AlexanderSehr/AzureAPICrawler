@@ -52,7 +52,7 @@ function Get-RoleAssignmentsList {
 
         $relevantRoles = [System.Collections.ArrayList]@()
 
-        if (($roleDefinitions | Where-Object { $_.Actions -like "$ProviderNamespace/$ResourceType/*" }).Count -eq 0) {
+        if (($roleDefinitions | Where-Object { $_.Actions -like "$ProviderNamespace/$ResourceType/*" -or $_.DataActions -like "$ProviderNamespace/$ResourceType/*"}).Count -eq 0) {
             # Pressumably, no roles are supported for this resource as no roles with its scope exist
             return @()
         }
