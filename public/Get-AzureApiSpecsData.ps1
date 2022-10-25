@@ -111,7 +111,7 @@ function Get-AzureApiSpecsData {
             foreach ($pathBlock in $pathData) {
                 $resolveInputObject = @{
                     JSONFilePath = $pathBlock.jsonFilePath
-                    JSONKeyPath  = $pathBlock.urlPath
+                    UrlPath  = $pathBlock.urlPath
                     ResourceType = $ResourceType
                 }
                 $resolvedParameters = Resolve-ModuleData @resolveInputObject

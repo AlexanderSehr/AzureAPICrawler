@@ -8,14 +8,14 @@ Extract the outer (top-level) and inner (property-level) parameters for a given 
 .PARAMETER JSONFilePath
 Mandatory. The service specification file to process.
 
-.PARAMETER JSONKeyPath
+.PARAMETER UrlPath
 Mandatory. The API Path in the JSON specification file to process
 
 .PARAMETER ResourceType
 Mandatory. The Resource Type to investigate
 
 .EXAMPLE
-Resolve-ModuleData -JSONFilePath '(...)/resource-manager/Microsoft.KeyVault/stable/2022-07-01/keyvault.json' -JSONKeyPath '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults/{vaultName}' -ResourceType 'vaults'
+Resolve-ModuleData -JSONFilePath '(...)/resource-manager/Microsoft.KeyVault/stable/2022-07-01/keyvault.json' -UrlPath '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults/{vaultName}' -ResourceType 'vaults'
 
 Process the API path '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults/{vaultName}' in file 'keyvault.json'
 #>
@@ -27,7 +27,7 @@ function Resolve-ModuleData {
         [string] $JSONFilePath,
 
         [Parameter(Mandatory = $true)]
-        [string] $JSONKeyPath,
+        [string] $UrlPath,
 
         [Parameter(Mandatory = $true)]
         [string] $ResourceType
@@ -43,18 +43,18 @@ function Resolve-ModuleData {
     # Get PUT parameters
     $putParametersInputObject = @{
         JSONFilePath      = $JSONFilePath
-        RelevantParamRoot = $specificationData.paths[$JSONKeyPath].put.parameters
-        JSONKeyPath       = $JSONKeyPath
+        RelevantParamRoot = $specificationData.paths[$UrlPath].put.parameters
+        UrlPath           = $UrlPath
         ResourceType      = $ResourceType
     }
     $templateData += Get-SpecsPropertiesAsParameterList @putParametersInputObject
 
     # Get PATCH parameters (as the REST command actually always is Create or Update)
-    if ($specificationData.paths[$JSONKeyPath].patch) {
+    if ($specificationData.paths[$UrlPath].patch) {
         $putParametersInputObject = @{
             JSONFilePath      = $JSONFilePath
-            RelevantParamRoot = $specificationData.paths[$JSONKeyPath].patch.parameters
-            JSONKeyPath       = $JSONKeyPath
+            RelevantParamRoot = $specificationData.paths[$UrlPath].patch.parameters
+            UrlPath           = $UrlPath
             ResourceType      = $ResourceType
         }
         $templateData += Get-SpecsPropertiesAsParameterList @putParametersInputObject
@@ -68,11 +68,51 @@ function Resolve-ModuleData {
         }
     }
 
-    return @{
+    $moduleData = @{
         parameters           = $filteredList
         additionalParameters = @()
         resources            = @()
         variables            = @()
         outputs              = @()
+        additionalFiles      = @()
     }
+
+    #################################
+    ##   Collect additional data   ##
+    #################################
+
+    # Set diagnostic data
+    $diagInputObject = @{
+        ProviderNamespace = $ProviderNamespace
+        ResourceType      = $ResourceType
+        ModuleData        = $ModuleData
+    }
+    Set-DiagnosticModuleData @diagInputObject
+
+    # Set Endpoint data
+    $endpInputObject = @{
+        JSONFilePath = $JSONFilePath
+        ResourceType = $ResourceType
+        ModuleData   = $ModuleData
+    }
+    Set-PrivateEndpointModuleData @endpInputObject
+
+    ## Set RBAC data
+    $rbacInputObject = @{
+        ProviderNamespace = $ProviderNamespace
+        ResourceType      = $ResourceType
+        ModuleData        = $ModuleData
+        ServiceApiVersion = Split-Path (Split-Path $JSONFilePath -Parent) -Leaf
+    }
+    Set-RoleAssignmentsModuleData @rbacInputObject
+
+    ## Set Locks data
+    $lockInputObject = @{
+        urlPath      = $UrlPath
+        ResourceType = $ResourceType
+        ModuleData   = $ModuleData
+    }
+    Set-LockModuleData @lockInputObject
+
+    return $moduleData
 }

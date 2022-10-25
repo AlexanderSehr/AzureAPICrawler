@@ -2,6 +2,8 @@
 
 This module provides you with the ability to fetch data for the API specs by providing it with the desired Provider-Namespace / Resource-Type combination.
 
+> Note: As this utility is strongly tight to the REST2CARML workstream of the [CARML](https://aka.ms/CARML) repository, the utility returns additional information you may not find useful (for example, the file content for a module's RBAC deployment).
+
 ### _Navigation_
 
 - [Usage](#usage)
@@ -45,6 +47,22 @@ This module provides you with the ability to fetch data for the API specs by pro
 
   # Get data for a specific child-resource type
   $out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceType 'storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
+
+  # Additional evaluation
+  ## Supports Locks
+  $out | Foreach-Object { [PSCustomObject]@{name = $_.identifier; supportsLock = $_.data.additionalParameters.name -contains 'lock' }} | Sort-Object -Property 'Name'
+
+  ## Supports Private Endpoints
+  $out | Foreach-Object { [PSCustomObject]@{name = $_.identifier; supportsLock = $_.data.additionalParameters.name -contains 'privateEndpoints' }} | Sort-Object -Property 'Name'
+  
+  ## Supports Diagnostic Settings
+  $out | Foreach-Object { [PSCustomObject]@{name = $_.identifier; supportsLock = $_.data.additionalParameters.name -contains 'diagnosticWorkspaceId' }} | Sort-Object -Property 'Name'
+
+  ## Supports RBAC
+  $out | Foreach-Object { [PSCustomObject]@{name = $_.identifier; supportsLock = $_.data.additionalParameters.name -contains 'roleAssignments' }} | Sort-Object -Property 'Name'
+  
+  ## Supported RBAC Roles
+  (($out | Where-Object { $_.identifier -eq 'Microsoft.Storage/storageAccounts/blobServices/containers' }).data.additionalFiles | Where-Object { $_.type -eq 'roleAssignments' }).onlyRoleDefinitionNames
   ```
   <img alt="Grid View" src="./src/GridViewFilter.jpg" />
  
@@ -53,8 +71,6 @@ This module provides you with the ability to fetch data for the API specs by pro
 
 - Fetch data for the resource type with parameters
 - Fetch data for child resources
-- Stretch: Extension resources like RBAC, Private Endpoints, etc.?
-
-# Out of scope (yet)
-
-- Extension data (Diagnostic data, Private Endpoints, etc.)
+- Extension resources like RBAC, Private Endpoints, etc.?
+  > Note: The data source for Diagnostic Locks & Metrics is not 100% reliable
+  > Note: The data source for Locks is not 100% reliable. Currently it is assumed that all top-level resources besides those in the Authorization Namespace support locks

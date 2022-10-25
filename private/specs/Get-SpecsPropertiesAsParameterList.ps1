@@ -14,7 +14,7 @@ Mandatory. The source content to crawl for data.
 .PARAMETER RelevantParamRoot
 Mandatory. The array of root parameters to process (e.g., PUT parameters).
 
-.PARAMETER JSONKeyPath
+.PARAMETER UrlPath
 Mandatory. The API Path in the JSON specification file to process
 
 .PARAMETER ResourceType
@@ -36,7 +36,7 @@ function Get-SpecsPropertiesAsParameterList {
         [array] $RelevantParamRoot,
 
         [Parameter(Mandatory = $true)]
-        [string] $JSONKeyPath,
+        [string] $UrlPath,
 
         [Parameter(Mandatory = $true)]
         [string] $ResourceType
@@ -76,7 +76,7 @@ function Get-SpecsPropertiesAsParameterList {
     # --------------------
     # Note: The name can be specified in different locations like the PUT statement, but also in the spec's 'parameters' object as a reference
     # Case: The name in the url is also a parameter of the PUT statement
-    $pathServiceName = (Split-Path $JSONKeyPath -Leaf) -replace '{|}', ''
+    $pathServiceName = (Split-Path $UrlPath -Leaf) -replace '{|}', ''
     if ($relevantParamRoot.name -contains $pathServiceName) {
         $param = $relevantParamRoot | Where-Object { $_.name -eq $pathServiceName }
 
@@ -135,7 +135,7 @@ function Get-SpecsPropertiesAsParameterList {
             type        = 'string'
             description = 'Location for all Resources.'
             required    = $false
-            default     = ($JSONKeyPath -like '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/*') ? 'resourceGroup().location' : 'deployment().location'
+            default     = ($UrlPath -like '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/*') ? 'resourceGroup().location' : 'deployment().location'
         }
         $templateData += $parameterObject
     }
