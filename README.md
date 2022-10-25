@@ -38,9 +38,47 @@ This module provides you with the ability to fetch data for the API specs by pro
 
   # Print a simple outline similar to the Azure Resource reference:
   $storageAccountResource.data.parameters | ForEach-Object { '{0}{1}:{2}' -f ('  ' * $_.level), $_.name, $_.type  } 
+  # Returns:
+  # --------
+  # name:string
+  # extendedLocation:object
+  #   type:string
+  #   name:string
+  # identity:object
+  #   type:string
+  #   userAssignedIdentities:object
+  # kind:string
+  # properties:object
+  #   keyPolicy:object
+  #   (...)
 
   # Filter parameters down to those containing the keyword 'network' 
   $storageAccountResource.data.parameters | Where-Object { $_.description -like "*network*" } | ConvertTo-Json
+  # Returns:
+  # --------
+  # [
+  #   {
+  #     "level": 1,
+  #     "type": "string",
+  #     "allowedValues": [
+  #       "Enabled",
+  #       "Disabled"
+  #     ],
+  #     "name": "publicNetworkAccess",
+  #     "required": false,
+  #     "description": "Allow or disallow public network access to Storage Account. Value is optional but if passed in, must be 'Enabled' or 'Disabled'.",
+  #     "Parent": "properties"
+  #   },
+  #   {
+  #     "level": 1,
+  #     "type": "object",
+  #     "name": "routingPreference",
+  #     "required": false,
+  #     "description": "Routing preference defines the type of network, either microsoft or internet routing to be used to deliver the user data, the default option is microsoft routing",
+  #     "Parent": "properties"
+  #   },
+  #   (...)
+  # ]
 
   # Use the Grid-View to enable dynamic UI processing using a table format
   $storageAccountResource.data.parameters | Where-Object { $_.type -notin @('object','array') } | ForEach-Object { [PSCustomObject]@{ Name = $_.name; Description = $_.description  }  } | Out-GridView
@@ -50,19 +88,77 @@ This module provides you with the ability to fetch data for the API specs by pro
 
   # Additional evaluation
   ## Supports Locks
-  $out | Foreach-Object { [PSCustomObject]@{name = $_.identifier; supportsLock = $_.data.additionalParameters.name -contains 'lock' }} | Sort-Object -Property 'Name'
+  $out | Foreach-Object { 
+    [PSCustomObject]@{
+      Name         = $_.identifier
+      'Supports Lock' = $_.data.additionalParameters.name -contains 'lock' 
+    }
+  } | Sort-Object -Property 'Name'
+  # Returns:
+  # --------
+  # Name                                                                           Supports Lock
+  # ----                                                                           -------------
+  # Microsoft.Storage/storageAccounts/blobServices/containers                              False
+  # Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies         False
 
   ## Supports Private Endpoints
-  $out | Foreach-Object { [PSCustomObject]@{name = $_.identifier; supportsLock = $_.data.additionalParameters.name -contains 'privateEndpoints' }} | Sort-Object -Property 'Name'
-  
+  $out | Foreach-Object { 
+    [PSCustomObject]@{
+      Name = $_.identifier
+      'Supports Private Endpoints' = $_.data.additionalParameters.name -contains 'privateEndpoints' 
+    }
+  } | Sort-Object -Property 'Name'
+  # Returns:
+  # --------
+  # Name                                                                           Supports Private Endpoints
+  # ----                                                                           --------------------------
+  # Microsoft.Storage/storageAccounts/blobServices/containers                                           False
+  # Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies                      False
+
   ## Supports Diagnostic Settings
-  $out | Foreach-Object { [PSCustomObject]@{name = $_.identifier; supportsLock = $_.data.additionalParameters.name -contains 'diagnosticWorkspaceId' }} | Sort-Object -Property 'Name'
+  $out | Foreach-Object { 
+    [PSCustomObject]@{
+      Name = $_.identifier
+      'Supports Diagnostic Settings' = $_.data.additionalParameters.name -contains 'diagnosticWorkspaceId' 
+    }
+  } | Sort-Object -Property 'Name'
+  # Returns:
+  # --------
+  # Name                                                                           Supports Diagnostic Settings
+  # ----                                                                           ----------------------------
+  # Microsoft.Storage/storageAccounts/blobServices/containers                                              True
+  # Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies                         True
 
   ## Supports RBAC
-  $out | Foreach-Object { [PSCustomObject]@{name = $_.identifier; supportsLock = $_.data.additionalParameters.name -contains 'roleAssignments' }} | Sort-Object -Property 'Name'
-  
+  $out | Foreach-Object { 
+    [PSCustomObject]@{
+      Name = $_.identifier
+      'Supports Role Assignments' = $_.data.additionalParameters.name -contains 'roleAssignments' 
+    }
+  } | Sort-Object -Property 'Name'
+  # Returns:
+  # --------
+  # Name                                                                           Supports Role Assignments
+  # ----                                                                           -------------------------
+  # Microsoft.Storage/storageAccounts/blobServices/containers                                           True
+  # Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies                      True
+
   ## Supported RBAC Roles
-  (($out | Where-Object { $_.identifier -eq 'Microsoft.Storage/storageAccounts/blobServices/containers' }).data.additionalFiles | Where-Object { $_.type -eq 'roleAssignments' }).onlyRoleDefinitionNames
+  (($out | Where-Object { 
+    $_.identifier -eq 'Microsoft.Storage/storageAccounts/blobServices/containers' 
+  }).data.additionalFiles | Where-Object { 
+    $_.type -eq 'roleAssignments' 
+  }).onlyRoleDefinitionNames
+  # Returns:
+  # --------
+  # Avere Contributor
+  # Avere Contributor
+  # Avere Operator
+  # Avere Operator
+  # Backup Contributor
+  # Backup Operator
+  # Contributor
+  # Desktop Virtualization Virtual Machine Contributor
   ```
   <img alt="Grid View" src="./src/GridViewFilter.jpg" />
  
