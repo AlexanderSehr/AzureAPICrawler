@@ -126,8 +126,8 @@ This module provides you with the ability to fetch data for the API specs by pro
   # --------
   # Name                                                                           Supports Diagnostic Settings
   # ----                                                                           ----------------------------
-  # Microsoft.Storage/storageAccounts/blobServices/containers                                              True
-  # Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies                         True
+  # Microsoft.Storage/storageAccounts/blobServices/containers                                             False
+  # Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies                        False
 
   ## Supports RBAC
   $out | Foreach-Object { 
@@ -168,5 +168,14 @@ This module provides you with the ability to fetch data for the API specs by pro
 - Fetch data for the resource type with parameters
 - Fetch data for child resources
 - Extension resources like RBAC, Private Endpoints, etc.?
-  > Note: The data source for Diagnostic Locks & Metrics is not 100% reliable
-  > Note: The data source for Locks is not 100% reliable. Currently it is assumed that all top-level resources besides those in the Authorization Namespace support locks
+
+# Known issues
+
+## Diagnostic Settings
+The data source for Diagnostic Logs & Metrics is not 100% reliable
+
+## Locks
+The data source for Locks is not 100% reliable. Currently it is assumed that all top-level resources besides those in the Authorization Namespace support locks
+
+## RBAC
+The logic to determine if a resource supports RBAC also includes resources that 'could' have roles (as per their resource type) but actually don't support them
