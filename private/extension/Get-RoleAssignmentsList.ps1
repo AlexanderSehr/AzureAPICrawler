@@ -43,7 +43,7 @@ function Get-RoleAssignmentsList {
         #################
         ##   Get Roles ##
         #################
-        $roleDefinitions = Get-DataThroughCache -Key 'roleDefinitions' -ScriptBlock { Get-AzRoleDefinition }
+        $roleDefinitions = Get-DataUsingCache -Key 'roleDefinitions' -ScriptBlock { Get-AzRoleDefinition }
 
         # Filter Custom Roles
         if (-not $IncludeCustomRoles) {

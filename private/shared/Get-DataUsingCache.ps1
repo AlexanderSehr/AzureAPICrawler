@@ -16,7 +16,7 @@ Get-CachedData -Key 'customCacheTest' -ScriptBlock { (Get-AzResourceGroup).Resou
 
 Get a value with the name 'customCacheTest' from the cache, unless its not existing. In that case, the script block is executed, a new cache value with identifier 'customCacheTest_cached' with its value is created and the result returned.
 #>
-function Get-DataThroughCache {
+function Get-DataUsingCache {
     
     [cmdletbinding()]
     param(
