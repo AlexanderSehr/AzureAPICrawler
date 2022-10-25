@@ -205,7 +205,6 @@ Check if a specific resource type supports RBAC
 ```PowerShell
 $out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceType 'storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
 $out | Foreach-Object { 
-$out | Foreach-Object { 
   [PSCustomObject]@{
     Name = $_.identifier
     'Supports Role Assignments' = $_.data.additionalParameters.name -contains 'roleAssignments' 
@@ -244,6 +243,44 @@ $out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceTyp
 # Desktop Virtualization Virtual Machine Contributor
 ``` 
 
+### Example 12
+
+Get an overview of which resource type supports which extension resource (e.g. Private Endpoints) 
+
+```PowerShell
+$out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceType 'storageAccounts' -Verbose -KeepArtifacts
+$out | Foreach-Object { 
+  [PSCustomObject]@{
+    Name = $_.identifier
+    'Supp. RBAC' = $_.data.additionalParameters.name -contains 'roleAssignments' 
+    'Supp. Diag. Sett.' = $_.data.additionalParameters.name -contains 'diagnosticWorkspaceId' 
+    'Supp. Pvt Endp.' = $_.data.additionalParameters.name -contains 'privateEndpoints' 
+    'Supp. Lock' = $_.data.additionalParameters.name -contains 'lock' 
+  }
+} | Sort-Object -Property 'Name' | Format-Table
+
+# Returns:
+# --------
+# Name                                                                           Supp. RBAC Supp. Diag. Sett. Supp. Pvt Endp. Supp. Lock
+# ----                                                                           ---------- ----------------- --------------- ----------
+# Microsoft.Storage/storageAccounts                                                    True              True            True       True
+# Microsoft.Storage/storageAccounts/blobServices                                       True              True           False      False
+# Microsoft.Storage/storageAccounts/blobServices/containers                            True             False           False      False
+# Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies      False             False           False      False
+# Microsoft.Storage/storageAccounts/encryptionScopes                                  False             False            True      False
+# Microsoft.Storage/storageAccounts/fileServices                                      False              True           False      False
+# Microsoft.Storage/storageAccounts/fileServices/shares                               False             False           False      False
+# Microsoft.Storage/storageAccounts/inventoryPolicies                                 False             False            True      False
+# Microsoft.Storage/storageAccounts/localUsers                                        False             False            True      False
+# Microsoft.Storage/storageAccounts/managementPolicies                                False             False            True      False
+# Microsoft.Storage/storageAccounts/objectReplicationPolicies                          True             False            True      False
+# Microsoft.Storage/storageAccounts/privateEndpointConnections                        False             False            True      False
+# Microsoft.Storage/storageAccounts/queueServices                                      True              True           False      False
+# Microsoft.Storage/storageAccounts/queueServices/queues                               True             False           False      False
+# Microsoft.Storage/storageAccounts/tableServices                                      True              True           False      False
+# Microsoft.Storage/storageAccounts/tableServices/tables                               True             False           False      False
+```
+
 # In scope
 
 - Fetch data for the resource type with parameters
@@ -253,10 +290,10 @@ $out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceTyp
 # Known issues
 
 ## Diagnostic Settings
-The data source for Diagnostic Logs & Metrics is not 100% reliable
+The data source which is the basis for the Diagnostic Logs & Metrics is not 100% reliable
 
 ## Locks
 The data source for Locks is not 100% reliable. Currently it is assumed that all top-level resources besides those in the Authorization Namespace support locks
 
 ## RBAC
-The logic to determine if a resource supports RBAC also includes resources that 'could' have roles (as per their resource type) but actually don't support them
+The logic to determine if a resource supports RBAC also includes resources that 'could' have roles (as per their resource type) but actually don't support them (e.b. `Microsoft.Storage/storageAccounts/blobServices`).

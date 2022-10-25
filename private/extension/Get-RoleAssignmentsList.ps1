@@ -52,6 +52,11 @@ function Get-RoleAssignmentsList {
 
         $relevantRoles = [System.Collections.ArrayList]@()
 
+        if (($roleDefinitions | Where-Object { $_.Actions -like "$ProviderNamespace/$ResourceType/*" }).Count -eq 0) {
+            # Pressumably, no roles are supported for this resource as no roles with its scope exist
+            return @()
+        }
+
         # Filter Action based
         $relevantRoles += $roleDefinitions | Where-Object {
             $_.Actions -like "$ProviderNamespace/$ResourceType/*" -or
@@ -74,10 +79,10 @@ function Get-RoleAssignmentsList {
         }
 
         return @{
-            bicepFormat = $resBicep
-            armFormat   = $resArm
-            onlyRoleDefinitionNames   = $relevantRoles.name | Sort-Object
-            onlyRoleDefinitionIds     = $relevantRoles.id
+            bicepFormat             = $resBicep
+            armFormat               = $resArm
+            onlyRoleDefinitionNames = $relevantRoles.name | Sort-Object
+            onlyRoleDefinitionIds   = $relevantRoles.id
         }
     }
 
