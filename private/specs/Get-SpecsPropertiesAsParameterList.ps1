@@ -89,8 +89,7 @@ function Get-SpecsPropertiesAsParameterList {
         }
 
         $parameterObject = Set-OptionalParameter -SourceParameterObject $param -TargetObject $parameterObject
-    }
-    else {
+    } else {
         # Case: The name is a ref in the spec's 'parameters' object. E.g., { "$ref": "#/parameters/BlobServicesName" }
         # For this, we need to find the correct ref, as there can be multiple
         $nonDefaultParameter = $relevantParamRoot.'$ref' | Where-Object { $_ -like '#/parameters/*' } | Where-Object { $specParameters[(Split-Path $_ -Leaf)].name -eq $pathServiceName }
