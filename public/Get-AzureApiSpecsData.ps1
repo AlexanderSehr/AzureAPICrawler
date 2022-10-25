@@ -37,7 +37,7 @@ Get the data for [Microsoft.Storage/storageAccounts/blobServices/containers] and
 #>
 function Get-AzureApiSpecsData {
 
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
         [string] $ProviderNamespace,
