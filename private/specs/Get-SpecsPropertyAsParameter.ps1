@@ -113,8 +113,8 @@ function Get-SpecsPropertyAsParameter {
         
         if ($Parameter.Keys -contains 'properties') {
             # Parameter is an object
-            if (-not $SkipLevel) {
-                $refObjects += @{
+            if (-not $SkipLevel) {               
+                $parameterObject = @{
                     level       = $Level
                     name        = $Name
                     type        = 'object'
@@ -122,6 +122,7 @@ function Get-SpecsPropertyAsParameter {
                     required    = $RequiredParametersOnLevel -contains $Name
                     Parent      = $Parent
                 }
+                $refObjects += Set-OptionalParameter -SourceParameterObject $Parameter -TargetObject $parameterObject
             }
 
             foreach ($property in $Parameter['properties'].Keys) {
