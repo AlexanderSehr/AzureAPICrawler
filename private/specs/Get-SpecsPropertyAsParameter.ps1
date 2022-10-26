@@ -155,7 +155,7 @@ function Get-SpecsPropertyAsParameter {
         # Parameter is an array
         if ($Parameter.items.Keys -contains '$ref') {
             # Each item is an object/array
-            $refObjects += @{
+            $parameterObject = @{
                 level       = $Level
                 name        = $Name
                 type        = 'array'
@@ -163,6 +163,7 @@ function Get-SpecsPropertyAsParameter {
                 required    = $RequiredParametersOnLevel -contains $Name
                 Parent      = $Parent
             }
+            $refObjects += Set-OptionalParameter -SourceParameterObject $Parameter -TargetObject $parameterObject
 
             $recursiveInputObject = @{
                 JSONFilePath              = $JSONFilePath
