@@ -65,33 +65,18 @@ function Get-AzureApiSpecsData {
         #########################################
         $repoUrl = $script:CONFIG.url_CloneRESTAPISpecRepository
         $repoName = Split-Path $repoUrl -LeafBase
+        $repositoryPath = (Join-Path $script:temp $repoName)
 
-        # Clone repository
-        ## Create temp folder
-        if (-not (Test-Path $script:temp)) {
-            $null = New-Item -Path $script:temp -ItemType 'Directory'
-        }
-        ## Switch to temp folder
-        Set-Location $script:temp
-
-        ## Clone repository into temp folder
-        if (-not (Test-Path (Join-Path $script:temp $repoName))) {
-            git clone --depth=1 --single-branch --branch=main --filter=tree:0 $repoUrl
-        }
-        else {
-            Write-Verbose "Repository [$repoName] already cloned"
-        }
-
-        Set-Location $initialLocation
+        Copy-CustomRepository -RepoUrl $repoUrl -RepoName $repoName
 
         try {
-            ###########################
-            ##   Fetch module data   ##
-            ###########################
+            ##############################################
+            ##   Find relevant Spec-Files & URL Paths   ##
+            ##############################################
             $getPathDataInputObject = @{
                 ProviderNamespace = $providerNamespace
                 ResourceType      = $ResourceType
-                RepositoryPath    = Join-Path $script:temp $repoName
+                RepositoryPath    = $repositoryPath
                 IncludePreview    = $IncludePreview
             }
             $pathData = Get-ServiceSpecPathData @getPathDataInputObject
@@ -101,7 +86,9 @@ function Get-AzureApiSpecsData {
                 $pathData = $pathData | Where-Object { [String]::IsNullOrEmpty($_.parentUrlPath) }
             }
 
-            # Iterate through parent & child-paths and extract the data
+            #################################################################
+            #   Iterate through parent & child-paths and extract the data   #
+            #################################################################
             $moduleData = @()
             foreach ($pathBlock in $pathData) {
                 # Calculate simplified identifier
