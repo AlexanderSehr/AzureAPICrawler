@@ -51,9 +51,6 @@ function Get-AzureApiSpecsData {
 
     begin {
         Write-Debug ('{0} entered' -f $MyInvocation.MyCommand)
-        Write-Verbose ('Processing module [{0}]' -f $FullResourceType) -Verbose
-
-        $initialLocation = (Get-Location).Path
         $providerNamespace = ($FullResourceType -split '/')[0]
         $resourceType = $FullResourceType -replace "$providerNamespace/", ''
     }
@@ -75,7 +72,7 @@ function Get-AzureApiSpecsData {
             ##############################################
             $getPathDataInputObject = @{
                 ProviderNamespace = $providerNamespace
-                ResourceType      = $ResourceType
+                ResourceType      = $resourceType
                 RepositoryPath    = $repositoryPath
                 IncludePreview    = $IncludePreview
             }
@@ -124,10 +121,7 @@ function Get-AzureApiSpecsData {
                     }
                 }
             }
-            #######################
-            ##   Create output   ##
-            #######################
-            # TODO: Return as expected output
+
             return $moduleData
 
         }
