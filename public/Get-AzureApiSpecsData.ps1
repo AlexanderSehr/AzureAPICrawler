@@ -5,11 +5,8 @@ Get module configuration data based on the latest API information available
 .DESCRIPTION
 Get module configuration data based on the latest API information available. If you want to use a nested resource type, just concatinate the identifiers like 'storageAccounts/blobServices/containers'
 
-.PARAMETER ProviderNamespace
-Mandatory. The provider namespace to query the data for
-
-.PARAMETER ResourceType
-Mandatory. The resource type to query the data for
+.PARAMETER FullResourceType
+Mandatory. The full resource type including the provider namespace to query the data for (e.g., Microsoft.Storage/storageAccounts)
 
 .PARAMETER ExcludeChildren
 Optional. Don't include child resource types in the result
@@ -21,17 +18,17 @@ Optional. Include preview API versions
 Optional. Skip the removal of downloaded/cloned artifacts (e.g. the API-Specs repository). Useful if you want to run the function multiple times in a row.
 
 .EXAMPLE
-Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Keyvault' -ResourceType 'vaults'
+Get-AzureApiSpecsData -FullResourceType 'Microsoft.Keyvault/vaults'
 
 Get the data for [Microsoft.Keyvault/vaults]
 
 .EXAMPLE
-Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.AVS' -ResourceType 'privateClouds' -Verbose -KeepArtifacts
+Get-AzureApiSpecsData -FullResourceType 'Microsoft.AVS/privateClouds' -Verbose -KeepArtifacts
 
 Get the data for [Microsoft.AVS/privateClouds] and do not delete any downloaded/cloned artifact.
 
 .EXAMPLE
-Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceType 'storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
+Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
 
 Get the data for [Microsoft.Storage/storageAccounts/blobServices/containers] and do not delete any downloaded/cloned artifact.
 #>
@@ -40,10 +37,7 @@ function Get-AzureApiSpecsData {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
-        [string] $ProviderNamespace,
-
-        [Parameter(Mandatory = $true)]
-        [string] $ResourceType,
+        [string] $FullResourceType,
 
         [Parameter(Mandatory = $false)]
         [switch] $ExcludeChildren,
@@ -57,10 +51,11 @@ function Get-AzureApiSpecsData {
 
     begin {
         Write-Debug ('{0} entered' -f $MyInvocation.MyCommand)
-
-        Write-Verbose ('Processing module [{0}/{1}]' -f $ProviderNamespace, $ResourceType) -Verbose
+        Write-Verbose ('Processing module [{0}]' -f $FullResourceType) -Verbose
 
         $initialLocation = (Get-Location).Path
+        $providerNamespace = ($FullResourceType -split '/')[0]
+        $resourceType = $FullResourceType -replace "$providerNamespace/", ''
     }
 
     process {
@@ -94,7 +89,7 @@ function Get-AzureApiSpecsData {
             ##   Fetch module data   ##
             ###########################
             $getPathDataInputObject = @{
-                ProviderNamespace = $ProviderNamespace
+                ProviderNamespace = $providerNamespace
                 ResourceType      = $ResourceType
                 RepositoryPath    = Join-Path $script:temp $repoName
                 IncludePreview    = $IncludePreview

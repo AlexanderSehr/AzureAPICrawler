@@ -24,7 +24,7 @@ This module provides you with the ability to fetch data for the API specs by pro
 Get the Storage Account resource data (and the one of all its child-resources)
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceType 'storageAccounts' -Verbose -KeepArtifacts
+$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
 
 # The object looks somewhat like:
 # Name                           Value
@@ -43,7 +43,7 @@ $out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceTyp
 Filter the list down to only the Storage Account itself
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceType 'storageAccounts' -Verbose -KeepArtifacts
+$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
 $storageAccountResource = $out | Where-Object { $_.identifier -eq 'Microsoft.Storage/storageAccounts' }
 ```
 
@@ -52,7 +52,7 @@ $storageAccountResource = $out | Where-Object { $_.identifier -eq 'Microsoft.Sto
 Print a simple outline similar to the Azure Resource reference:
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceType 'storageAccounts' -Verbose -KeepArtifacts
+$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
 $storageAccountResource = $out | Where-Object { $_.identifier -eq 'Microsoft.Storage/storageAccounts' }
 $storageAccountResource.data.parameters | ForEach-Object { '{0}{1}:{2}' -f ('  ' * $_.level), $_.name, $_.type  } 
 
@@ -76,7 +76,7 @@ $storageAccountResource.data.parameters | ForEach-Object { '{0}{1}:{2}' -f ('  '
 Filter parameters down to those containing the keyword 'network' and format the result as JSON.
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceType 'storageAccounts' -Verbose -KeepArtifacts
+$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
 $storageAccountResource = $out | Where-Object { $_.identifier -eq 'Microsoft.Storage/storageAccounts' }
 $storageAccountResource.data.parameters | Where-Object { $_.description -like "*network*" } | ConvertTo-Json
 
@@ -112,7 +112,7 @@ $storageAccountResource.data.parameters | Where-Object { $_.description -like "*
 Use the Grid-View to enable dynamic UI processing using a table format
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceType 'storageAccounts' -Verbose -KeepArtifacts
+$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
 $storageAccountResource = $out | Where-Object { $_.identifier -eq 'Microsoft.Storage/storageAccounts' }
 $storageAccountResource.data.parameters | Where-Object { 
   $_.type -notin @('object','array') 
@@ -132,7 +132,7 @@ $storageAccountResource.data.parameters | Where-Object {
 Get data for a specific child-resource type
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceType 'storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
+$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
 ```
 
 ### Example 7
@@ -140,7 +140,7 @@ $out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceTyp
 Check if a specific resource type supports Locks
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceType 'storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
+$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
 $out | Foreach-Object { 
   [PSCustomObject]@{
     Name         = $_.identifier
@@ -161,7 +161,7 @@ $out | Foreach-Object {
 Check if a specific resource type supports Private Endpoints
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceType 'storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
+$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
 $out | Foreach-Object { 
   [PSCustomObject]@{
     Name = $_.identifier
@@ -182,7 +182,7 @@ $out | Foreach-Object {
 Check if a specific resource type supports Diagnostic Settings
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceType 'storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
+$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
 $out | Foreach-Object { 
   [PSCustomObject]@{
     Name = $_.identifier
@@ -203,7 +203,7 @@ $out | Foreach-Object {
 Check if a specific resource type supports RBAC
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceType 'storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
+$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
 $out | Foreach-Object { 
   [PSCustomObject]@{
     Name = $_.identifier
@@ -224,7 +224,7 @@ $out | Foreach-Object {
 Get the RBAC roles that apply to a given Resource Type (if any)
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceType 'storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
+$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
 (($out | Where-Object { 
   $_.identifier -eq 'Microsoft.Storage/storageAccounts/blobServices/containers' 
 }).data.additionalFiles | Where-Object { 
@@ -248,7 +248,7 @@ $out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceTyp
 Get an overview of which resource type supports which extension resource (e.g. Private Endpoints) 
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -ProviderNamespace 'Microsoft.Storage' -ResourceType 'storageAccounts' -Verbose -KeepArtifacts
+$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
 $out | Foreach-Object { 
   [PSCustomObject]@{
     Name = $_.identifier
