@@ -149,8 +149,8 @@ function Get-SpecsPropertyAsParameter {
                 Parameter                 = $Parameter
                 RequiredParametersOnLevel = $RequiredParametersOnLevel
                 Level                     = $Level
-                Parent                    = $Name
-                Name                      = $property
+                Parent                    = $Parent
+                Name                      = $Name
             }
             $refObjects += Get-SpecsPropertyAsParameter @recursiveInputObject
         }
