@@ -112,7 +112,7 @@ function Get-SpecsPropertiesAsParameterList {
 
     # Process outer properties
     # ------------------------0
-    foreach ($outerParameter in $outerParameters.properties.Keys | Where-Object { $_ -notin @('location') -and -not $outerParameters.properties[$_].readOnly } | Sort-Object ) {
+    foreach ($outerParameter in $outerParameters.properties.Keys | Where-Object { $_ -notin @('location') -and -not $outerParameters.properties[$_].readOnly } | Sort-Object) {
         $innerParamInputObject = @{
             JSONFilePath              = $JSONFilePath
             Parameter                 = $outerParameters.properties[$outerParameter]
