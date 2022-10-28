@@ -127,7 +127,7 @@ function Get-SpecsPropertiesAsParameterList {
 
     # Special case: Location
     # The location parameter is not explicitely documented at this place (even though it should). It is however referenced as 'required' and must be included
-    if ($outerParameters.required -contains 'location') {
+    if ($outerParameters.required -contains 'location' -or $outerParameters.properties.Keys -contains 'location') {
         $parameterObject = @{
             level       = 0
             name        = 'location'
