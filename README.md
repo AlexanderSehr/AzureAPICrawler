@@ -296,4 +296,4 @@ The data source which is the basis for the Diagnostic Logs & Metrics is not 100%
 The data source for Locks is not 100% reliable. Currently it is assumed that all top-level resources besides those in the Authorization Namespace support locks
 
 ## RBAC
-The logic to determine if a resource supports RBAC also includes resources that 'could' have roles (as per their resource type) but actually don't support them (e.b. `Microsoft.Storage/storageAccounts/blobServices`).
+The logic to determine if a resource supports RBAC also includes resources that 'could' have roles (as per their resource type) but actually don't support them (e.g., `Microsoft.Storage/storageAccounts/blobServices`).
