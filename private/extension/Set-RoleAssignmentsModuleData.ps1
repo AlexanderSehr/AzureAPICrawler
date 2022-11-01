@@ -63,29 +63,32 @@ function Set-RoleAssignmentsModuleData {
 
         $ModuleData.additionalParameters += @(
             @{
-                name          = 'roleAssignments'
-                type          = 'array'
-                description   = "Array of role assignment objects that contain the \'roleDefinitionIdOrName\' and \'principalId\' to define RBAC role assignments on this resource. In the roleDefinitionIdOrName attribute, you can provide either the display name of the role definition, or its fully qualified ID in the following format: \'/providers/Microsoft.Authorization/roleDefinitions/c2f4ef07-c644-48eb-af81-4b1b4947fb11\'."
-                required      = $false
-                default       = @()
+                name        = 'roleAssignments'
+                type        = 'array'
+                description = "Array of role assignment objects that contain the \'roleDefinitionIdOrName\' and \'principalId\' to define RBAC role assignments on this resource. In the roleDefinitionIdOrName attribute, you can provide either the display name of the role definition, or its fully qualified ID in the following format: \'/providers/Microsoft.Authorization/roleDefinitions/c2f4ef07-c644-48eb-af81-4b1b4947fb11\'."
+                required    = $false
+                default     = @()
             }
         )
 
-        $ModuleData.resources += @(
-            "module $($resourceTypeSingular)_roleAssignments '.bicep/nested_roleAssignments.bicep' = [for (roleAssignment,index) in roleAssignments: {"
-            "  name: '`${uniqueString(deployment().name, location)}-$resourceTypeSingular-Rbac-`${index}'"
-            '  params: {'
-            "    description: contains(roleAssignment,'description') ? roleAssignment.description : ''"
-            '    principalIds: roleAssignment.principalIds'
-            "    principalType: contains(roleAssignment,'principalType') ? roleAssignment.principalType : ''"
-            '    roleDefinitionIdOrName: roleAssignment.roleDefinitionIdOrName'
-            "    condition: contains(roleAssignment,'condition') ? roleAssignment.condition : ''"
-            "    delegatedManagedIdentityResourceId: contains(roleAssignment,'delegatedManagedIdentityResourceId') ? roleAssignment.delegatedManagedIdentityResourceId : ''"
-            "    resourceId: $resourceTypeSingular.id"
-            '  }'
-            '}]'
-            ''
-        )
+        $ModuleData.modules += @{
+            name    = "$($resourceTypeSingular)_roleAssignments"
+            content = @(
+                "module $($resourceTypeSingular)_roleAssignments '.bicep/nested_roleAssignments.bicep' = [for (roleAssignment,index) in roleAssignments: {"
+                "  name: '`${uniqueString(deployment().name, location)}-$resourceTypeSingular-Rbac-`${index}'"
+                '  params: {'
+                "    description: contains(roleAssignment,'description') ? roleAssignment.description : ''"
+                '    principalIds: roleAssignment.principalIds'
+                "    principalType: contains(roleAssignment,'principalType') ? roleAssignment.principalType : ''"
+                '    roleDefinitionIdOrName: roleAssignment.roleDefinitionIdOrName'
+                "    condition: contains(roleAssignment,'condition') ? roleAssignment.condition : ''"
+                "    delegatedManagedIdentityResourceId: contains(roleAssignment,'delegatedManagedIdentityResourceId') ? roleAssignment.delegatedManagedIdentityResourceId : ''"
+                "    resourceId: $resourceTypeSingular.id"
+                '  }'
+                '}]'
+                ''
+            )
+        }
 
         $fileContent = @()
         $rawContent = Get-Content -Path (Join-Path $script:src 'nested_roleAssignments.bicep') -Raw
@@ -103,7 +106,7 @@ function Set-RoleAssignmentsModuleData {
         # Set content
         $roleTemplateFilePath = Join-Path '.bicep' 'nested_roleAssignments.bicep'
 
-        if ($PSCmdlet.ShouldProcess("RBAC data for file in path [$roleTemplateFilePath]", "Set")) {
+        if ($PSCmdlet.ShouldProcess("RBAC data for file in path [$roleTemplateFilePath]", 'Set')) {
             $ModuleData.additionalFiles += @{
                 type                    = 'roleAssignments'
                 relativeFilePath        = $roleTemplateFilePath
