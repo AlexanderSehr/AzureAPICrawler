@@ -60,6 +60,11 @@ function Resolve-ModuleData {
         $templateData += Get-SpecsPropertiesAsParameterList @putParametersInputObject
     }
 
+    # Check if there can be mutliple instances of the current Resource Type. 
+    # For example, this is 'true' for Resource Type 'Microsoft.Storage/storageAccounts/blobServices/containers', and 'false' for Resource Type 'Microsoft.Storage/storageAccounts/blobServices' 
+    $listUrlPath = (Split-Path $UrlPath -Parent) -replace '\\', '/'
+    $isSingleton = $specificationData.paths[$listUrlPath].get.Keys -notcontains 'x-ms-pageable'
+
     # Filter duplicates introduced by overlaps of PUT & PATCH
     $filteredList = @()
     foreach ($property in $templateData) {
@@ -69,6 +74,7 @@ function Resolve-ModuleData {
     }
 
     $moduleData = @{
+        isSingleton          = $isSingleton
         parameters           = $filteredList
         additionalParameters = @()
         resources            = @()
