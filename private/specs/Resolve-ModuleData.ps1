@@ -36,8 +36,9 @@ function Resolve-ModuleData {
     # Output object
     $templateData = [System.Collections.ArrayList]@()
 
-    # Collect data
-    # ------------
+    #####################################
+    ##   Collect primary module data   ##
+    #####################################
     $specificationData = Get-Content -Path $JSONFilePath -Raw | ConvertFrom-Json -AsHashtable
 
     # Get PUT parameters
@@ -60,11 +61,6 @@ function Resolve-ModuleData {
         $templateData += Get-SpecsPropertiesAsParameterList @putParametersInputObject
     }
 
-    # Check if there can be mutliple instances of the current Resource Type. 
-    # For example, this is 'true' for Resource Type 'Microsoft.Storage/storageAccounts/blobServices/containers', and 'false' for Resource Type 'Microsoft.Storage/storageAccounts/blobServices' 
-    $listUrlPath = (Split-Path $UrlPath -Parent) -replace '\\', '/'
-    $isSingleton = $specificationData.paths[$listUrlPath].get.Keys -notcontains 'x-ms-pageable'
-
     # Filter duplicates introduced by overlaps of PUT & PATCH
     $filteredList = @()
     foreach ($property in $templateData) {
@@ -74,7 +70,6 @@ function Resolve-ModuleData {
     }
 
     $moduleData = @{
-        isSingleton          = $isSingleton
         parameters           = $filteredList
         additionalParameters = @()
         resources            = @()
@@ -121,6 +116,11 @@ function Resolve-ModuleData {
         ModuleData   = $ModuleData
     }
     Set-LockModuleData @lockInputObject
+    
+    # Check if there can be mutliple instances of the current Resource Type. 
+    # For example, this is 'true' for Resource Type 'Microsoft.Storage/storageAccounts/blobServices/containers', and 'false' for Resource Type 'Microsoft.Storage/storageAccounts/blobServices' 
+    $listUrlPath = (Split-Path $UrlPath -Parent) -replace '\\', '/'
+    $moduleData['isSingleton'] = $specificationData.paths[$listUrlPath].get.Keys -notcontains 'x-ms-pageable'
 
     return $moduleData
 }
