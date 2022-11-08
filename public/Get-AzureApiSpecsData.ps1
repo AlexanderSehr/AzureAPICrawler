@@ -126,7 +126,7 @@ function Get-AzureApiSpecsData {
 
         }
         catch {
-            throw $_
+            throw ($_, $_.ScriptStackTrace)
         }
         finally {
             ##########################
