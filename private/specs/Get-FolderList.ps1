@@ -17,12 +17,17 @@ Paths must NOT contain
 Mandatory. The root folder to search from (recursively).
 
 .PARAMETER ProviderNamespace
-Mandatory. The ProviderNsmespace to filter for.
+Optional. The ProviderNsmespace to filter for.
 
 .EXAMPLE
 Get-FolderList -RootFolder './temp/azure-rest-api-specs/specification' -ProviderNamespace 'Microsoft.KeyVault'
 
 Get all folders of the 'Microsoft.KeyVault' provider namespace that exist in the 'specifications' folder
+
+.EXAMPLE
+Get-FolderList -RootFolder './temp/azure-rest-api-specs/specification' 
+
+Get all folders that contain resource data that exist in the 'specifications' folder
 #>
 function Get-FolderList {
 
@@ -31,7 +36,7 @@ function Get-FolderList {
         [Parameter(Mandatory = $true)]
         [string] $RootFolder,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [string] $ProviderNamespace
     )
 
@@ -44,8 +49,10 @@ function Get-FolderList {
     $filteredFilePaths = $filteredFilePaths | Where-Object {
         ($_ -replace '\\', '/') -notlike '*/examples/*'
     }
-    $filteredFolderPaths = $filteredFolderPaths | Where-Object {
-        ($_ -replace '\\', '/') -like "*/$ProviderNamespace/*"
+    if ($ProviderNamespace) {
+        $filteredFolderPaths = $filteredFolderPaths | Where-Object {
+            ($_ -replace '\\', '/') -like "*/$ProviderNamespace/*"
+        }
     }
     $filteredFolderPaths = $filteredFolderPaths | Where-Object {
         (($_ -replace '\\', '/') -like '*/stable') -or (($_ -replace '\\', '/') -like '*/preview')
