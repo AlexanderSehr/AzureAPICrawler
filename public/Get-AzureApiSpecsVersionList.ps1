@@ -12,7 +12,7 @@ Optional. Provide if preview versions should be included
 Optional. Provide if any downloaded data should not be removed after the function ran. This is useful to speed up subsequent runs.
 
 .EXAMPLE
-Get-AzureApiSpecsVersionList 
+Get-AzureAPISpecsVersionList 
 
 Returns an object like:
 {
@@ -37,7 +37,7 @@ Returns an object like:
 }
 
 #>
-function Get-AzureApiSpecsVersionList {
+function Get-AzureAPISpecsVersionList {
 
     [CmdletBinding()]
     param (

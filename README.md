@@ -1,20 +1,26 @@
-# REST to CARML
+# Azure API Crawler
 
-This module provides you with the ability to fetch data for the API specs by providing it with the desired Provider-Namespace / Resource-Type combination.
+This module provides you with the ability to fetch data from the API specs.
 
-> Note: As this utility is strongly tight to the REST2CARML workstream of the [CARML](https://aka.ms/CARML) repository, the utility returns additional information you may not find useful (for example, the file content for a module's RBAC deployment).
+<details>
+
+<summary><code>Get-AzureAPISpecsData</code></summary>
+
+Use this utility to get detailed information of a provided ProviderNamespace-ResourceType combination such as  the available properties.
 
 ### _Navigation_
 
-- [Usage](#usage)
-- [In-scope](#in-scope)
-- [Out-of-scope](#out-of-scope)
+- [Usage](#get-AzureAPIspecsdata-usage)
+- [In-scope](#get-AzureAPIspecsdata-in-scope)
+- [Known issues](#get-AzureAPIspecsdata-known-issues)
 
 ---
 
-## Usage
-- Import the module using the command `Import-Module './utilities/tools/AzureApiCrawler/AzureApiCrawler.psm1' -Force -Verbose`
-- Invoke its primary function using the command `Get-AzureApiSpecsData -ProviderNamespace '<ProviderNamespace>' -ResourceType '<ResourceType>' -Verbose -KeepArtifacts`
+> Note: This utility is related to the [CARML](https://aka.ms/CARML) repository. Hence this may returns additional information you may not find useful (for example, the file content for a module's RBAC deployment).
+
+## `Get-AzureAPISpecsData`: Usage
+- Import the module using the command `Import-Module './utilities/tools/AzureAPICrawler/AzureAPICrawler.psm1' -Force -Verbose`
+- Invoke its primary function using the command `Get-AzureAPISpecsData -ProviderNamespace '<ProviderNamespace>' -ResourceType '<ResourceType>' -Verbose -KeepArtifacts`
 - For repeated runs it is recommended to append the `-KeepArtifacts` parameter as the function will otherwise repeatably download & eventually delete the required documentation
 - Process the output
   At the time of this writing, the output structure is not yet decided. To this end, the function will return a flat list of all parameters with all their data. The following examples may give you some inspiration what you can do with that output.
@@ -24,7 +30,7 @@ This module provides you with the ability to fetch data for the API specs by pro
 Get the Storage Account resource data (and the one of all its child-resources)
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
+$out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
 
 # The object looks somewhat like:
 # Name                           Value
@@ -43,7 +49,7 @@ $out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccount
 Filter the list down to only the Storage Account itself
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
+$out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
 $storageAccountResource = $out | Where-Object { $_.identifier -eq 'Microsoft.Storage/storageAccounts' }
 ```
 
@@ -52,7 +58,7 @@ $storageAccountResource = $out | Where-Object { $_.identifier -eq 'Microsoft.Sto
 Print a simple outline similar to the Azure Resource reference:
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
+$out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
 $storageAccountResource = $out | Where-Object { $_.identifier -eq 'Microsoft.Storage/storageAccounts' }
 $storageAccountResource.data.parameters | ForEach-Object { '{0}{1}:{2}' -f ('  ' * $_.level), $_.name, $_.type  } 
 
@@ -76,7 +82,7 @@ $storageAccountResource.data.parameters | ForEach-Object { '{0}{1}:{2}' -f ('  '
 Filter parameters down to those containing the keyword 'network' and format the result as JSON.
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
+$out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
 $storageAccountResource = $out | Where-Object { $_.identifier -eq 'Microsoft.Storage/storageAccounts' }
 $storageAccountResource.data.parameters | Where-Object { $_.description -like "*network*" } | ConvertTo-Json
 
@@ -112,7 +118,7 @@ $storageAccountResource.data.parameters | Where-Object { $_.description -like "*
 Use the Grid-View to enable dynamic UI processing using a table format
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
+$out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
 $storageAccountResource = $out | Where-Object { $_.identifier -eq 'Microsoft.Storage/storageAccounts' }
 $storageAccountResource.data.parameters | Where-Object { 
   $_.type -notin @('object','array') 
@@ -132,7 +138,7 @@ $storageAccountResource.data.parameters | Where-Object {
 Get data for a specific child-resource type
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
+$out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
 ```
 
 ### Example 7
@@ -140,7 +146,7 @@ $out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccount
 Check if a specific resource type supports Locks
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
+$out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
 $out | Foreach-Object { 
   [PSCustomObject]@{
     Name         = $_.identifier
@@ -161,7 +167,7 @@ $out | Foreach-Object {
 Check if a specific resource type supports Private Endpoints
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
+$out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
 $out | Foreach-Object { 
   [PSCustomObject]@{
     Name = $_.identifier
@@ -182,7 +188,7 @@ $out | Foreach-Object {
 Check if a specific resource type supports Diagnostic Settings
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
+$out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
 $out | Foreach-Object { 
   [PSCustomObject]@{
     Name = $_.identifier
@@ -203,7 +209,7 @@ $out | Foreach-Object {
 Check if a specific resource type supports RBAC
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
+$out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
 $out | Foreach-Object { 
   [PSCustomObject]@{
     Name = $_.identifier
@@ -224,7 +230,7 @@ $out | Foreach-Object {
 Get the RBAC roles that apply to a given Resource Type (if any)
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
+$out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
 (($out | Where-Object { 
   $_.identifier -eq 'Microsoft.Storage/storageAccounts/blobServices/containers' 
 }).data.additionalFiles | Where-Object { 
@@ -248,7 +254,7 @@ $out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccount
 Get an overview of which resource type supports which extension resource (e.g. Private Endpoints) 
 
 ```PowerShell
-$out = Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
+$out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
 $out | Foreach-Object { 
   [PSCustomObject]@{
     Name = $_.identifier
@@ -281,19 +287,89 @@ $out | Foreach-Object {
 # Microsoft.Storage/storageAccounts/tableServices/tables                          True               False             False False
 ```
 
-# In scope
+## `Get-AzureAPISpecsData`: In scope
 
 - Fetch data for the resource type with parameters
 - Fetch data for child resources
-- Extension resources like RBAC, Private Endpoints, etc.?
+- Extension resources like RBAC, Private Endpoints, etc.
 
-# Known issues
+## `Get-AzureAPISpecsData`: Known issues
 
-## Diagnostic Settings
+### Diagnostic Settings
 The data source which is the basis for the Diagnostic Logs & Metrics is not 100% reliable
 
-## Locks
+### Locks
 The data source for Locks is not 100% reliable. Currently it is assumed that all top-level resources besides those in the Authorization Namespace support locks
 
-## RBAC
+### RBAC
 The logic to determine if a resource supports RBAC also includes resources that 'could' have roles (as per their resource type) but actually don't support them (e.g., `Microsoft.Storage/storageAccounts/blobServices`).
+
+</details>
+
+
+<details>
+<summary><code>Get-AzureAPISpecsVersionList</code></summary>
+
+Use this utility to get an overview of all available API versions for any Provider specified in the [azure-rest-api-specs](https://github.com/Azure/azure-rest-api-specs) repository.
+
+### _Navigation_
+
+
+- [Usage](#get-azureapispecsversionlist-usage)
+- [In-scope](#get-azureapispecsversionlist-in-scope)
+- [Known issues](#get-azureapispecsversionlist-known-issues)
+
+---
+
+## `Get-AzureAPISpecsVersionList`: Usage
+
+- Import the module using the command `Import-Module './utilities/tools/AzureAPICrawler/AzureAPICrawler.psm1' -Force -Verbose`
+- Invoke its primary function using the command `Get-AzureAPISpecsVersionList -Verbose -KeepArtifacts`
+- For repeated runs it is recommended to append the `-KeepArtifacts` parameter as the function will otherwise repeatably download & eventually delete the required documentation
+- Process the output
+
+### Example 1  
+
+Get the Storage Account resource data (and the one of all its child-resources)
+
+```PowerShell
+$out = Get-AzureApiSpecsVersionList -KeepArtifacts -Verbose -IncludePreview | ConvertTo-Json
+
+# The object looks somewhat like:
+# {
+#     "Microsoft.AAD": {
+#         "domainServices": [
+#             "2017-01-01",
+#             "2017-06-01",
+#             "2020-01-01",
+#             "2021-03-01",
+#             "2021-05-01",
+#             "2022-09-01"
+#         ],
+#         "domainServices/ouContainer": [
+#             "2017-06-01",
+#             "2020-01-01",
+#             "2021-03-01",
+#             "2021-05-01",
+#             "2022-09-01"
+#         ]
+#     },
+#     "microsoft.aadiam": {
+#         "azureADMetrics": [
+#             "2020-07-01-preview"
+#         ]
+#     },
+#     (..)
+# }
+```
+
+## `Get-AzureAPISpecsVersionList`: In scope
+
+- Fetch all API versions available for all Providers in the [azure-rest-api-specs](https://github.com/Azure/azure-rest-api-specs) repository.
+- Filter optionally by preview version
+
+## `Get-AzureAPISpecsVersionList`: Known issues
+
+_None (yet)_
+
+</details>

@@ -105,7 +105,7 @@ function Resolve-ModuleData {
         ProviderNamespace = $ProviderNamespace
         ResourceType      = $ResourceType
         ModuleData        = $ModuleData
-        ServiceApiVersion = Split-Path (Split-Path $JSONFilePath -Parent) -Leaf
+        ServiceAPIVersion = Split-Path (Split-Path $JSONFilePath -Parent) -Leaf
     }
     Set-RoleAssignmentsModuleData @rbacInputObject
 

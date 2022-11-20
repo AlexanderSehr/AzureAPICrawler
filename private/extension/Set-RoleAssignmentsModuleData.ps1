@@ -11,14 +11,14 @@ Mandatory. The ProviderNamespace to fetch the available role options for.
 .PARAMETER ResourceType
 Mandatory. The ResourceType to fetch the available role options for.
 
-.PARAMETER ServiceApiVersion
+.PARAMETER ServiceAPIVersion
 Mandatory. The API version of the module to generate the RBAC module file for
 
 .PARAMETER ModuleData
 Mandatory. The ModuleData object to populate.
 
 .EXAMPLE
-Set-RoleAssignmentsModuleData -ProviderNamespace 'Microsoft.KeyVault' -ResourceType 'vaults' -ServiceApiVersion '10-10-2022' -ModuleData @{ parameters = @(...); resources = @(...); (...) }
+Set-RoleAssignmentsModuleData -ProviderNamespace 'Microsoft.KeyVault' -ResourceType 'vaults' -ServiceAPIVersion '10-10-2022' -ModuleData @{ parameters = @(...); resources = @(...); (...) }
 
 Generate the nested_roleAssignment.bicep file in the [Microsoft.KeyVault/vaults]'s module path and add any additional required data to the provided module data object.
 #>
@@ -33,7 +33,7 @@ function Set-RoleAssignmentsModuleData {
         [string] $ResourceType,
 
         [Parameter(Mandatory = $true)]
-        [string] $ServiceApiVersion,
+        [string] $ServiceAPIVersion,
 
         [Parameter(Mandatory = $true)]
         [Hashtable] $ModuleData
@@ -52,7 +52,7 @@ function Set-RoleAssignmentsModuleData {
             providerNamespace    = $ProviderNamespace
             resourceType         = $ResourceType
             resourceTypeSingular = $resourceTypeSingular
-            apiVersion           = $ServiceApiVersion
+            apiVersion           = $ServiceAPIVersion
         }
 
         $roleAssignmentList = Get-RoleAssignmentsList -ProviderNamespace $ProviderNamespace -ResourceType $ResourceType

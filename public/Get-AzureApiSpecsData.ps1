@@ -18,21 +18,21 @@ Optional. Include preview API versions
 Optional. Skip the removal of downloaded/cloned artifacts (e.g. the API-Specs repository). Useful if you want to run the function multiple times in a row.
 
 .EXAMPLE
-Get-AzureApiSpecsData -FullResourceType 'Microsoft.Keyvault/vaults'
+Get-AzureAPISpecsData -FullResourceType 'Microsoft.Keyvault/vaults'
 
 Get the data for [Microsoft.Keyvault/vaults]
 
 .EXAMPLE
-Get-AzureApiSpecsData -FullResourceType 'Microsoft.AVS/privateClouds' -Verbose -KeepArtifacts
+Get-AzureAPISpecsData -FullResourceType 'Microsoft.AVS/privateClouds' -Verbose -KeepArtifacts
 
 Get the data for [Microsoft.AVS/privateClouds] and do not delete any downloaded/cloned artifact.
 
 .EXAMPLE
-Get-AzureApiSpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
+Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
 
 Get the data for [Microsoft.Storage/storageAccounts/blobServices/containers] and do not delete any downloaded/cloned artifact.
 #>
-function Get-AzureApiSpecsData {
+function Get-AzureAPISpecsData {
 
     [CmdletBinding()]
     param (
