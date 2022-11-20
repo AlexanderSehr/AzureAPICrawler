@@ -29,11 +29,10 @@ jobs:
         id: pester_api_util
         shell: pwsh
         run: |
-          $loc = (Get-Location).Path
-          Write-Host "Loc [$loc]"
+          $root = Split-Path (Split-Path (Get-Location).Path)
 
-          $SpecsFilePath = Join-Path 'AzureAPICrawler' 'apiSpecsList.json'
-          $null = Import-Module (Join-Path 'AzureAPICrawler' 'AzureAPICrawler.psm1')
+          $SpecsFilePath = Join-Path $root 'AzureAPICrawler' 'apiSpecsList.json'
+          $null = Import-Module (Join-Path $root 'AzureAPICrawler' 'AzureAPICrawler.psm1')
 
           # Fetch data
           $res = Get-AzureApiSpecsVersionList -IncludePreview -Verbose
@@ -54,20 +53,20 @@ jobs:
         id: pester_run_step
         shell: pwsh
         run: |
-          $outputPath = Join-Path $env:GITHUB_WORKSPACE 'testResults.xml'
+          $root = Split-Path (Split-Path (Get-Location).Path)
+
+          $outputPath = Join-Path $root 'testResults.xml'
           Write-Verbose "Pester tests output: $outputPath" -Verbose
           Write-Output ('{0}={1}' -f 'outputPath', $outputPath) >> $env:GITHUB_OUTPUT
-
-          ls
 
           # --------------------- #
           # Invoke Pester test(s) #
           # --------------------- #
           Invoke-Pester -Configuration @{
             Run        = @{
-                Container = New-PesterContainer -Path (Join-Path 'AzureAPICrawler' '.github' 'workflows' 'scripts' 'Get-AzureAPISpecsVersionList.Tests.ps1') -Data @{
-                  SpecsFilePath           = Join-Path 'AzureAPICrawler' 'apiSpecsList.json'
-                  ResourceModulesFilePath = 'ResourceModules'
+                Container = New-PesterContainer -Path (Join-Path $root 'AzureAPICrawler' '.github' 'workflows' 'scripts' 'Get-AzureAPISpecsVersionList.Tests.ps1') -Data @{
+                  SpecsFilePath           = Join-Path $root 'AzureAPICrawler' 'apiSpecsList.json'
+                  ResourceModulesFilePath = Join-Path $root 'ResourceModules'
               }
             }
             TestResult = @{
