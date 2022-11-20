@@ -29,11 +29,8 @@ jobs:
         id: pester_api_util
         shell: pwsh
         run: |
-          Write-Host (Get-Childitem env:* | Out-String)
-          ls 'AzureAPICrawler'
-
-          $SpecsFilePath = Join-Path $env:GITHUB_WORKSPACE 'apiSpecsList.json'
-          $null = Import-Module (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler.psm1')
+          $SpecsFilePath = Join-Path 'AzureAPICrawler' 'apiSpecsList.json'
+          $null = Import-Module (Join-Path 'AzureAPICrawler' 'AzureAPICrawler.psm1')
 
           # Fetch data
           $res = Get-AzureApiSpecsVersionList -IncludePreview -Verbose
@@ -65,9 +62,9 @@ jobs:
           # --------------------- #
           Invoke-Pester -Configuration @{
             Run        = @{
-                Container = New-PesterContainer -Path (Join-Path $env:GITHUB_WORKSPACE '.github' 'workflows' 'scripts' 'Get-AzureAPISpecsVersionList.Tests.ps1') -Data @{
-                  SpecsFilePath           = Join-Path $env:GITHUB_WORKSPACE 'apiSpecsList.json'
-                  ResourceModulesFilePath = Join-Path $env:GITHUB_WORKSPACE 'ResourceModules'
+                Container = New-PesterContainer -Path (Join-Path 'AzureAPICrawler' '.github' 'workflows' 'scripts' 'Get-AzureAPISpecsVersionList.Tests.ps1') -Data @{
+                  SpecsFilePath           = Join-Path 'AzureAPICrawler' 'apiSpecsList.json'
+                  ResourceModulesFilePath = 'ResourceModules'
               }
             }
             TestResult = @{
