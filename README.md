@@ -348,7 +348,7 @@ Use this utility to get an overview of all available API versions for any Provid
 Get the Storage Account resource data (and the one of all its child-resources)
 
 ```PowerShell
-$out = Get-AzureApiSpecsVersionList -KeepArtifacts -Verbose -IncludePreview | ConvertTo-Json
+$out = Get-AzureAPISpecsVersionList -KeepArtifacts -Verbose -IncludePreview | ConvertTo-Json
 
 # The object looks somewhat like:
 # {

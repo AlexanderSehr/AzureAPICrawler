@@ -40,7 +40,7 @@ jobs:
           $null = Import-Module (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'AzureAPICrawler.psm1')
 
           # Fetch data
-          $res = Get-AzureApiSpecsVersionList -IncludePreview -Verbose
+          $res = Get-AzureAPISpecsVersionList -IncludePreview -Verbose
           $fileContent = $res | ConvertTo-Json
 
           # Set content

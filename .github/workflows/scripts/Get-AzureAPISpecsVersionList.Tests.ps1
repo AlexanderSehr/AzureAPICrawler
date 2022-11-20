@@ -7,7 +7,7 @@ param (
 )
 
 $templateFilePaths = (Get-ChildItem -Path (Join-Path $ResourceModulesFilePath 'modules') -Filter 'deploy.bicep' -Recurse).FullName
-$availableApiVersions = Get-Content -Path $SpecsFilePath -Raw | ConvertFrom-Json -Depth 10
+$availableAPIVersions = Get-Content -Path $SpecsFilePath -Raw | ConvertFrom-Json -Depth 10
 
 $testCases = [System.Collections.ArrayList]@()
 foreach ($templateFilePath in $templateFilePaths) {
@@ -36,7 +36,7 @@ foreach ($templateFilePath in $templateFilePaths) {
                 providerNamespace    = $providerNamespace
                 resourceType         = $resourceType
                 apiVersion           = $apiVersion
-                availableApiVersions = $availableApiVersions
+                availableAPIVersions = $availableAPIVersions
             }
         }
     }
@@ -50,17 +50,17 @@ Describe "Test API version availablity" {
             [string] $providerNamespace,
             [string]  $resourceType,
             [string]  $apiVersion,
-            [PSCustomObject] $availableApiVersions
+            [PSCustomObject] $availableAPIVersions
         )
 
         # Provider Namespace test
-        ($availableApiVersions | Get-Member -Type NoteProperty).Name  | Should -Contain $providerNamespace
+        ($availableAPIVersions | Get-Member -Type NoteProperty).Name  | Should -Contain $providerNamespace
         
         # Resource Type test
-        ($availableApiVersions.$providerNamespace | Get-Member -Type NoteProperty).Name  | Should -Contain $resourceType
+        ($availableAPIVersions.$providerNamespace | Get-Member -Type NoteProperty).Name  | Should -Contain $resourceType
 
         # API version test
-        $availableApiVersions.$providerNamespace.$resourceType | Should -Contain $apiVersion
+        $availableAPIVersions.$providerNamespace.$resourceType | Should -Contain $apiVersion
     }
 }
 
