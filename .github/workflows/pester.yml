@@ -31,14 +31,11 @@ jobs:
         run: |
           $root = Split-Path (Split-Path (Get-Location).Path)
 
-          Write-Host "4"
-          ls (Join-Path $root 'AzureAPICrawler' 'AzureAPICrawler' 'AzureAPICrawler')
-
           Write-Host "5"
-          ls (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler')
+          ls $env:GITHUB_WORKSPACE
 
-          $SpecsFilePath = Join-Path $root 'AzureAPICrawler' 'apiSpecsList.json'
-          $null = Import-Module (Join-Path $root 'AzureAPICrawler' 'AzureAPICrawler.psm1')
+          $SpecsFilePath = Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'apiSpecsList.json'
+          $null = Import-Module (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'AzureAPICrawler.psm1')
 
           # Fetch data
           $res = Get-AzureApiSpecsVersionList -IncludePreview -Verbose
@@ -70,9 +67,9 @@ jobs:
           # --------------------- #
           Invoke-Pester -Configuration @{
             Run        = @{
-                Container = New-PesterContainer -Path (Join-Path $root 'AzureAPICrawler' '.github' 'workflows' 'scripts' 'Get-AzureAPISpecsVersionList.Tests.ps1') -Data @{
-                  SpecsFilePath           = Join-Path $root 'AzureAPICrawler' 'apiSpecsList.json'
-                  ResourceModulesFilePath = Join-Path $root 'ResourceModules'
+                Container = New-PesterContainer -Path (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' '.github' 'workflows' 'scripts' 'Get-AzureAPISpecsVersionList.Tests.ps1') -Data @{
+                  SpecsFilePath           = Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'apiSpecsList.json'
+                  ResourceModulesFilePath = Join-Path $env:GITHUB_WORKSPACE 'ResourceModules'
               }
             }
             TestResult = @{
