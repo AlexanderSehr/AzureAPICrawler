@@ -100,7 +100,7 @@ jobs:
           # --------------------- #
           Invoke-Pester -Configuration @{
             Run        = @{
-                Container = New-PesterContainer -Path (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'tests' 'Get-AzureAPISpecsData.Tests.ps1') -Data @{}
+                Container = New-PesterContainer -Path (Join-Path $env:GITHUB_WORKSPACE 'tests' 'Get-AzureAPISpecsData.Tests.ps1') -Data @{}
             }
             TestResult = @{
               TestSuiteName = 'Data Tests'
