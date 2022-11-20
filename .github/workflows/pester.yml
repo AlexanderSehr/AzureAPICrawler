@@ -9,74 +9,74 @@ env:
   variablesPath: '.github/settings.yml'
 
 jobs:
-  job_pester_GetVersionList:
-    runs-on: ubuntu-20.04
-    name: '[Get-AzureAPISpecsVersionList] validation'
-    steps:
-      - name: 'Checkout AzureAPICrawler'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          path: AzureAPICrawler
-      - name: Checkout CARML
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          repository: Azure/ResourceModules
-          path: ResourceModules
+  # job_pester_GetVersionList:
+  #   runs-on: ubuntu-20.04
+  #   name: '[Get-AzureAPISpecsVersionList] validation'
+  #   steps:
+  #     - name: 'Checkout AzureAPICrawler'
+  #       uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
+  #         path: AzureAPICrawler
+  #     - name: Checkout CARML
+  #       uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
+  #         repository: Azure/ResourceModules
+  #         path: ResourceModules
 
-      - name: 'Run API List utility'
-        id: pester_api_util
-        shell: pwsh
-        run: |
-          $SpecsFilePath = Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'apiSpecsList.json'
-          $null = Import-Module (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'AzureAPICrawler.psm1')
+  #     - name: 'Run API List utility'
+  #       id: pester_api_util
+  #       shell: pwsh
+  #       run: |
+  #         $SpecsFilePath = Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'apiSpecsList.json'
+  #         $null = Import-Module (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'AzureAPICrawler.psm1')
 
-          # Fetch data
-          $res = Get-AzureAPISpecsVersionList -IncludePreview -Verbose
-          $fileContent = $res | ConvertTo-Json
+  #         # Fetch data
+  #         $res = Get-AzureAPISpecsVersionList -IncludePreview -Verbose
+  #         $fileContent = $res | ConvertTo-Json
 
-          # Set content
-          if (-not (Test-Path $SpecsFilePath)) {
-            $null = New-Item -Path $SpecsFilePath -Force -Value $fileContent
-          } else {
-            $null = Set-Content -Path $SpecsFilePath -Value $fileContent -Force
-          }
+  #         # Set content
+  #         if (-not (Test-Path $SpecsFilePath)) {
+  #           $null = New-Item -Path $SpecsFilePath -Force -Value $fileContent
+  #         } else {
+  #           $null = Set-Content -Path $SpecsFilePath -Value $fileContent -Force
+  #         }
 
-      - name: 'Run tests'
-        id: pester_run_step
-        shell: pwsh
-        run: |
-          $outputPath = Join-Path $env:GITHUB_WORKSPACE 'getVersionListtestResults.xml'
-          Write-Verbose "Pester tests output: $outputPath" -Verbose
-          Write-Output ('{0}={1}' -f 'outputPath', $outputPath) >> $env:GITHUB_OUTPUT
+  #     - name: 'Run tests'
+  #       id: pester_run_step
+  #       shell: pwsh
+  #       run: |
+  #         $outputPath = Join-Path $env:GITHUB_WORKSPACE 'getVersionListtestResults.xml'
+  #         Write-Verbose "Pester tests output: $outputPath" -Verbose
+  #         Write-Output ('{0}={1}' -f 'outputPath', $outputPath) >> $env:GITHUB_OUTPUT
 
-          # --------------------- #
-          # Invoke Pester test(s) #
-          # --------------------- #
-          Invoke-Pester -Configuration @{
-            Run        = @{
-                Container = New-PesterContainer -Path (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'tests' 'Get-AzureAPISpecsVersionList.Tests.ps1') -Data @{
-                  SpecsFilePath           = Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'apiSpecsList.json'
-                  ResourceModulesFilePath = Join-Path $env:GITHUB_WORKSPACE 'ResourceModules'
-              }
-            }
-            TestResult = @{
-              TestSuiteName = 'API Tests'
-              OutputPath    = $outputPath
-              OutputFormat  = 'JUnitXml'
-              Enabled       = $true
-            }
-            Output     = @{
-              Verbosity = 'Detailed'
-            }
-          }
+  #         # --------------------- #
+  #         # Invoke Pester test(s) #
+  #         # --------------------- #
+  #         Invoke-Pester -Configuration @{
+  #           Run        = @{
+  #               Container = New-PesterContainer -Path (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'tests' 'Get-AzureAPISpecsVersionList.Tests.ps1') -Data @{
+  #                 SpecsFilePath           = Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'apiSpecsList.json'
+  #                 ResourceModulesFilePath = Join-Path $env:GITHUB_WORKSPACE 'ResourceModules'
+  #             }
+  #           }
+  #           TestResult = @{
+  #             TestSuiteName = 'API Tests'
+  #             OutputPath    = $outputPath
+  #             OutputFormat  = 'JUnitXml'
+  #             Enabled       = $true
+  #           }
+  #           Output     = @{
+  #             Verbosity = 'Detailed'
+  #           }
+  #         }
 
-      - name: 'Publish Test Results'
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
-        with:
-          junit_files: '${{ steps.pester_run_step.outputs.outputPath }}'
+  #     - name: 'Publish Test Results'
+  #       uses: EnricoMi/publish-unit-test-result-action@v2
+  #       if: always()
+  #       with:
+  #         junit_files: '${{ steps.pester_run_step.outputs.outputPath }}'
 
   job_pester_GetData:
     runs-on: ubuntu-20.04
