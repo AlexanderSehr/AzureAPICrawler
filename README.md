@@ -314,7 +314,6 @@ Use this utility to get an overview of all available API versions for any Provid
 
 ### _Navigation_
 
-
 - [Usage](#get-azureapispecsversionlist-usage)
 - [In-scope](#get-azureapispecsversionlist-in-scope)
 - [Known issues](#get-azureapispecsversionlist-known-issues)
