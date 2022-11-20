@@ -25,7 +25,7 @@ jobs:
         id: pester_api_util
         shell: pwsh
         run: |
-          $SpecsFilePath = $env:GITHUB_WORKSPACE 'apiSpecsList.json'
+          $SpecsFilePath = Join-Path $env:GITHUB_WORKSPACE 'apiSpecsList.json'
           $null = Import-Module (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler.psm1')
 
           # Fetch data
