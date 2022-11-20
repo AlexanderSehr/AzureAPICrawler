@@ -1,0 +1,81 @@
+name: 'Test Utility'
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 12 * * *' # Daily test
+
+env:
+  variablesPath: '.github/settings.yml'
+jobs:
+  job_pester_validation:
+    runs-on: ubuntu-20.04
+    name: 'Validation'
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Check out CARML
+        uses: actions/checkout@v3
+        with:
+          repository: Azure/ResourceModules
+
+      - name: 'Run API List utility'
+        id: pester_api_util
+        shell: pwsh
+        run: |
+          $SpecsFilePath = $env:GITHUB_WORKSPACE 'apiSpecsList.json'
+          $null = Import-Module (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler.psm1')
+
+          # Fetch data
+          $res = Get-AzureApiSpecsVersionList -IncludePreview -Verbose
+          $fileContent = $res | ConvertTo-Json
+
+          # Set content
+          if (-not (Test-Path $SpecsFilePath)) {
+              if ($PSCmdlet.ShouldProcess('API Specs file [apiSpecsList.json]', 'Create')) {
+                  $null = New-Item -Path $SpecsFilePath -Force -Value $fileContent
+              }
+          } else {
+              if ($PSCmdlet.ShouldProcess('API Specs file [apiSpecsList.json]', 'Update')) {
+                  $null = Set-Content -Path $SpecsFilePath -Value $fileContent -Force
+              }
+          }
+
+      - name: 'Run Pester tests'
+        id: pester_run_step
+        shell: pwsh
+        run: |
+          $outputPath = Join-Path $env:GITHUB_WORKSPACE 'testResults.xml'
+          Write-Verbose "Pester tests output: $outputPath" -Verbose
+          Write-Output ('{0}={1}' -f 'outputPath', $outputPath) >> $env:GITHUB_OUTPUT
+
+          ls
+
+          # --------------------- #
+          # Invoke Pester test(s) #
+          # --------------------- #
+          Invoke-Pester -Configuration @{
+            Run        = @{
+                Container = New-PesterContainer -Path (Join-Path $env:GITHUB_WORKSPACE '.github' 'workflows' 'scripts' 'Get-AzureAPISpecsVersionList.Tests.ps1') -Data @{
+                  SpecsFilePath           = Join-Path $env:GITHUB_WORKSPACE 'apiSpecsList.json'
+                  ResourceModulesFilePath = Join-Path $env:GITHUB_WORKSPACE 'ResourceModules' 
+              }
+            }
+            TestResult = @{
+              TestSuiteName = 'API Tests'
+              OutputPath    = $outputPath
+              OutputFormat  = 'JUnitXml'
+              Enabled       = $true
+            }
+            Output     = @{
+              Verbosity = 'Detailed'
+            }
+          }
+
+      - name: 'Publish Test Results'
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          junit_files: '${{ steps.pester_run_step.outputs.outputPath }}'
