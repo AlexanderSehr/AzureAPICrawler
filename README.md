@@ -51,6 +51,14 @@ Filter the list down to only the Storage Account itself
 ```PowerShell
 $out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
 $storageAccountResource = $out | Where-Object { $_.identifier -eq 'Microsoft.Storage/storageAccounts' }
+
+# Returns:
+# --------
+# Name                           Value
+# ----                           -----
+# metadata                       {[jsonFilePath, C:\dev\azure-rest-api-specs\specification\storage\resource-manager\Microsoft.Storage\stable\2022-09-01\storage.json], [parentUrlPa… 
+# data                           {[additionalFiles, System.Object[]], [resources, System.Object[]], [additionalParameters, System.Object[]], [variables, System.Object[]]…}
+# identifier                     Microsoft.Storage/storageAccounts
 ```
 
 ### Example 3
@@ -139,6 +147,14 @@ Get data for a specific child-resource type
 
 ```PowerShell
 $out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
+
+# Returns:
+# --------
+# Name                           Value
+# ----                           -----
+# metadata                       {[jsonFilePath, C:\dev\azure-rest-api-specs\specification\storage\resource-manager\Microsoft.Storage\stable\2022-09-01\containers.json], [parentUrlPa… 
+# data                           {[additionalFiles, System.Object[]], [resources, System.Object[]], [additionalParameters, System.Object[]], [variables, System.Object[]]…}
+# identifier                     Microsoft.Storage/storageAccounts/containers
 ```
 
 ### Example 7
