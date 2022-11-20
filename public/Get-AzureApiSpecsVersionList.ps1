@@ -88,7 +88,8 @@ function Get-AzureApiSpecsVersionList {
 
                 $apiVersion = Split-Path (Split-Path $filePath -Parent) -Leaf
 
-                $pathData = (Get-Content $filePath -Raw | ConvertFrom-Json -AsHashtable).paths
+                $specificationData = Get-Content $filePath -Raw | ConvertFrom-Json -AsHashtable
+                $pathData = $specificationData.paths
 
                 if (-not $pathData) {
                     continue
@@ -96,12 +97,13 @@ function Get-AzureApiSpecsVersionList {
 
                 # Collect all URL paths that
                 # - contain a 'PUT' - which means you can create the resource
-                # - end with a variable name {...} or 'default'
+                # - end with a variable name {...} or a string (i.e. given value like "default")
                 # - contain the 'Microsoft.' provider, or equals any of the exceptions like ResourceGroup & ResourceTags
                 $relevantPaths = $pathData.Keys | Where-Object { 
                     $pathData[$_].Keys -contains 'put' -and 
-                    $_ -match "\w+}$|default$" -and 
-                    ($_ -like "*Microsoft.*" -or $_ -in @(
+                    $_ -match "\w+}$|\w+$" -and 
+                    ($_ -match ".*\/providers\/Microsoft\..+" -or # Ignoring anything without 'providers' in the name as it does not seem to be relevant to IaC
+                    $_ -in @(
                         '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}', # Special case: Resource Group
                         '/{scope}/providers/Microsoft.Resources/tags/default' # Special case: Tags
                     )) 
@@ -136,15 +138,57 @@ function Get-AzureApiSpecsVersionList {
                     if ($resultSet.Keys -notcontains $providerNamespace) {
                         $resultSet[$providerNamespace] = @{}
                     }
-                    
-                    if ($resultSet[$providerNamespace].Keys -notcontains $resourceType) {
-                        $resultSet[$providerNamespace][$resourceType] = @()
+
+                    if ($relevantPath -match ".+}\/{(\w+)}\/{\w+}$") {
+                        # Special resource types like PrivateDNSZones
+                        # '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnszones/{zoneName}/{recordType}/{relativeRecordSetName}'
+                        
+                        # $pathElemName = ($resourceType -split '/')[-2] -replace '\{|}'
+                        $pathElemName = $matches[1]
+                        # Needs special handling as the 'recordType' in this example must be resolved with a parameter that specifies to be part of the path like ["in": "path"]
+                        # 1. check: Direct URL Parameter
+                        $pathParameters = $pathData[$relevantPath].put.parameters | Where-Object { 
+                            $_.in -eq 'path' -and $_.name -eq $pathElemName
+                        }
+
+                        if (-not $pathParameters) {
+                            continue
+                        }
+
+                        # 2. check: Parameters-specification element - Only relevant for non-deployment types?
+                        # if (-not $pathParameters) {
+                        #     $pathParameters = $specificationData.parameters.Keys | Where-Object { 
+                        #         $specificationData.parameters[$_].in -eq 'path' 
+                        #     } | ForEach-Object { 
+                        #         $specificationData.parameters[$_] 
+                        #     }
+                        # }
+
+                        if($pathParameters.Keys -contains 'enum') {
+                            foreach($elem in $pathParameters.enum) {
+                                $formattedResourceType = $resourceType -replace "\{$pathElemName}", $elem
+
+                                if ($resultSet[$providerNamespace].Keys -notcontains $formattedResourceType) {
+                                    $resultSet[$providerNamespace][$formattedResourceType] = @()
+                                }
+
+                                $apiVersionList = (@() + $resultSet[$providerNamespace][$formattedResourceType] + $apiVersion) | Sort-Object -Unique
+                                $resultSet[$providerNamespace][$formattedResourceType] = $apiVersionList -is [array] ? $apiVersionList : @($apiVersion)
+                            }
+                        }
+                        else {
+                            Write-Verbose "Ignoring [$relevantPath] in file [$filePath] as we failed to resolve the path's properties." 
+                        }
                     }
+                    else {        
+                        if ($resultSet[$providerNamespace].Keys -notcontains $resourceType) {
+                            $resultSet[$providerNamespace][$resourceType] = @()
+                        }
 
-                    $apiVersionList = (@() + $resultSet[$providerNamespace][$resourceType] + $apiVersion) | Sort-Object -Unique
-                    $resultSet[$providerNamespace][$resourceType] = $apiVersionList -is [array] ? $apiVersionList : @($apiVersion)
+                        $apiVersionList = (@() + $resultSet[$providerNamespace][$resourceType] + $apiVersion) | Sort-Object -Unique
+                        $resultSet[$providerNamespace][$resourceType] = $apiVersionList -is [array] ? $apiVersionList : @($apiVersion)
+                    }
                 }
-
                 $percentageComplete = [System.Math]::Floor(($fileIndex / $filePaths.Count) * 100)
                 Write-Progress -Activity "Analyzing in progress" -Status ("[{0}/{1}] or {2}% files processed" -f $fileIndex, $filePaths.count, $percentageComplete) -PercentComplete $percentageComplete
             }
