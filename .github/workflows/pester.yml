@@ -29,13 +29,6 @@ jobs:
         id: pester_api_util
         shell: pwsh
         run: |
-          $root = Split-Path (Split-Path (Get-Location).Path)
-
-          Write-Host "5"
-          ls (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler')
-          Write-Host "6"
-          ls (Join-Path $env:GITHUB_WORKSPACE 'ResourceModules')
-
           $SpecsFilePath = Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'apiSpecsList.json'
           $null = Import-Module (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'AzureAPICrawler.psm1')
 
@@ -58,8 +51,6 @@ jobs:
         id: pester_run_step
         shell: pwsh
         run: |
-          $root = Split-Path (Split-Path (Get-Location).Path)
-
           $outputPath = Join-Path $root 'testResults.xml'
           Write-Verbose "Pester tests output: $outputPath" -Verbose
           Write-Output ('{0}={1}' -f 'outputPath', $outputPath) >> $env:GITHUB_OUTPUT
