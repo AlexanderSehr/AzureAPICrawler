@@ -7,6 +7,7 @@ on:
 
 env:
   variablesPath: '.github/settings.yml'
+
 jobs:
   job_pester_validation:
     runs-on: ubuntu-20.04
@@ -28,8 +29,9 @@ jobs:
         id: pester_api_util
         shell: pwsh
         run: |
-          ls
-          
+          Write-Host (Get-Childitem env:* | Out-String)
+          ls 'AzureAPICrawler'
+
           $SpecsFilePath = Join-Path $env:GITHUB_WORKSPACE 'apiSpecsList.json'
           $null = Import-Module (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler.psm1')
 
