@@ -7,7 +7,6 @@ param (
 )
 
 $templateFilePaths = (Get-ChildItem -Path (Join-Path $ResourceModulesFilePath 'modules') -Filter 'deploy.bicep' -Recurse).FullName
-
 $availableApiVersions = Get-Content -Path $SpecsFilePath -Raw | ConvertFrom-Json -Depth 10
 
 $testCases = [System.Collections.ArrayList]@()

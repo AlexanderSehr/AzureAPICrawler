@@ -30,7 +30,7 @@
     Copyright            = '(c) Microsoft. All rights reserved.'
 
     # Description of the functionality provided by this module
-    Description          = 'This module intends to ease processing the Azure REST API specs repository by providing you with a couple useful utilities.'
+    Description          = 'This module intends to ease processing the Azure REST API Specs repository (https://github.com/Azure/azure-rest-api-specs) by providing you with a couple useful utilities.'
 
     # Minimum version of the PowerShell engine required by this module
     # PowerShellVersion = ''

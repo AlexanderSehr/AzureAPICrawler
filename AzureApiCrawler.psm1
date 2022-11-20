@@ -2,7 +2,6 @@
 param()
 
 # Load central config file; Config File can be referenced within module scope by $script:CONFIG
-Write-Verbose 'Load Config'
 $moduleConfigPath = Join-Path $PSScriptRoot 'ModuleConfig.psd1'
 $script:CONFIG = Import-PowerShellDataFile -Path (Resolve-Path ($moduleConfigPath))
 
