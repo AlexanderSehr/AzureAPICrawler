@@ -31,9 +31,14 @@ jobs:
         run: |
           $root = Split-Path (Split-Path (Get-Location).Path)
 
+          Write-Host "1"
           ls $root
 
+          Write-Host "2"
           ls (Join-Path $root 'AzureAPICrawler')
+
+          Write-Host "3"
+          ls (Join-Path $root 'AzureAPICrawler' 'AzureAPICrawler')
 
           $SpecsFilePath = Join-Path $root 'AzureAPICrawler' 'apiSpecsList.json'
           $null = Import-Module (Join-Path $root 'AzureAPICrawler' 'AzureAPICrawler.psm1')
