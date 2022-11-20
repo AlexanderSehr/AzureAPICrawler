@@ -40,6 +40,12 @@ jobs:
           Write-Host "3"
           ls (Join-Path $root 'AzureAPICrawler' 'AzureAPICrawler')
 
+          Write-Host "4"
+          ls (Join-Path $root 'AzureAPICrawler' 'AzureAPICrawler' 'AzureAPICrawler'')
+
+          Write-Host "5"
+          ls (Join-Path $root $env:GITHUB_WORKSPACE 'AzureAPICrawler'')
+
           $SpecsFilePath = Join-Path $root 'AzureAPICrawler' 'apiSpecsList.json'
           $null = Import-Module (Join-Path $root 'AzureAPICrawler' 'AzureAPICrawler.psm1')
 
