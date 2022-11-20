@@ -47,7 +47,7 @@ jobs:
         id: pester_run_step
         shell: pwsh
         run: |
-          $outputPath = Join-Path $root 'testResults.xml'
+          $outputPath = Join-Path $env:GITHUB_WORKSPACE 'testResults.xml'
           Write-Verbose "Pester tests output: $outputPath" -Verbose
           Write-Output ('{0}={1}' -f 'outputPath', $outputPath) >> $env:GITHUB_OUTPUT
 
