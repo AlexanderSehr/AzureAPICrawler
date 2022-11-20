@@ -95,6 +95,8 @@ jobs:
           Write-Verbose "Pester tests output: $outputPath" -Verbose
           Write-Output ('{0}={1}' -f 'outputPath', $outputPath) >> $env:GITHUB_OUTPUT
 
+          $null = Import-Module (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler.psm1')
+
           # --------------------- #
           # Invoke Pester test(s) #
           # --------------------- #
