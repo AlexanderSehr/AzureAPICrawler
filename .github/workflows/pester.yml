@@ -29,6 +29,9 @@ jobs:
         id: pester_api_util
         shell: pwsh
         run: |
+          $loc = (Get-Location).Path
+          Write-Host "Loc [$loc]"
+
           $SpecsFilePath = Join-Path 'AzureAPICrawler' 'apiSpecsList.json'
           $null = Import-Module (Join-Path 'AzureAPICrawler' 'AzureAPICrawler.psm1')
 
