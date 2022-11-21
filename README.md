@@ -13,6 +13,7 @@ Use this utility to get detailed information of a provided ProviderNamespace-Res
 - [Usage](#get-AzureAPIspecsdata-usage)
 - [In-scope](#get-AzureAPIspecsdata-in-scope)
 - [Known issues](#get-AzureAPIspecsdata-known-issues)
+- [Notes](#get-azureapispecsdata-notes)
 
 ---
 
@@ -302,6 +303,15 @@ $out | Foreach-Object {
 # Microsoft.Storage/storageAccounts/tableServices                                 True                True             False False
 # Microsoft.Storage/storageAccounts/tableServices/tables                          True               False             False False
 ```
+
+
+
+## `Get-AzureAPISpecsData`: Notes
+
+- The result set describes the queried resource and all its child resources
+- Each entry in the describes one resource type
+- A resource's 'data' property describes a data we extracted from the API specs (e.g. parameters)
+  - If its property 'isSingleton' is true, only one instance of that service can be deployed at this level (e.g. a 'blobServices' resource for a storage account) 
 
 ## `Get-AzureAPISpecsData`: In scope
 

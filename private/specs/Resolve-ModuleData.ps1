@@ -120,7 +120,16 @@ function Resolve-ModuleData {
     # Check if there can be mutliple instances of the current Resource Type. 
     # For example, this is 'true' for Resource Type 'Microsoft.Storage/storageAccounts/blobServices/containers', and 'false' for Resource Type 'Microsoft.Storage/storageAccounts/blobServices' 
     $listUrlPath = (Split-Path $UrlPath -Parent) -replace '\\', '/'
-    $moduleData['isSingleton'] = $specificationData.paths[$listUrlPath].get.Keys -notcontains 'x-ms-pageable'
+
+    if($specificationData.paths[$listUrlPath].get.Keys -contains 'x-ms-pageable') {
+        if([String]::IsNullOrEmpty($specificationData.paths[$listUrlPath]['get']['x-ms-pageable']['nextLinkName'])) {
+            $moduleData['isSingleton'] = $true
+        } else {
+            $moduleData['isSingleton'] = $false
+        }
+    } else {
+        $moduleData['isSingleton'] = $true
+    }
 
     return $moduleData
 }
