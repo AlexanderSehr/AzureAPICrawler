@@ -39,9 +39,9 @@ jobs:
         shell: pwsh
         run: |
           ls $env:GITHUB_WORKSPACE
-          
+
           # Load used functions
-          . (Join-Path $env:GITHUB_WORKSPACE '.github' 'scripts' 'Set-EnvironmentOnAgent.ps1')
+          . (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' '.github' 'scripts' 'Set-EnvironmentOnAgent.ps1')
 
           # Define PS modules to install on the runner
           $Modules = @(
@@ -112,7 +112,7 @@ jobs:
           # --------------------- #
           Invoke-Pester -Configuration @{
             Run        = @{
-                Container = New-PesterContainer -Path (Join-Path $env:GITHUB_WORKSPACE 'tests' 'Get-AzureAPISpecsData.Tests.ps1') -Data @{}
+                Container = New-PesterContainer -Path (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'tests' 'Get-AzureAPISpecsData.Tests.ps1') -Data @{}
             }
             TestResult = @{
               TestSuiteName = 'Data Tests'
