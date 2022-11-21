@@ -11,7 +11,7 @@ env:
 jobs:
   job_pester_GetVersionList:
     runs-on: ubuntu-20.04
-    name: '[Get-AzureAPISpecsVersionList] validation'
+    name: 'Validation scripts'
     steps:
       # [Checkout] task(s)
       # ---------------
