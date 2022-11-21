@@ -90,7 +90,7 @@ jobs:
             }
           }
 
-      - name: 'Publish Test Results'
+      - name: 'Publish [Get-AzureAPISpecsVersionList] Test Results'
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
@@ -126,7 +126,7 @@ jobs:
             }
           }
 
-      - name: 'Publish Test Results'
+      - name: 'Publish [Get-AzureAPISpecsData] Test Results'
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
