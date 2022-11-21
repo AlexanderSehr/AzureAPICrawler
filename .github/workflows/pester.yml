@@ -38,6 +38,15 @@ jobs:
       - name: 'Setup agent'
         shell: pwsh
         run: |
+          Write-Host "1"
+          ls $env:GITHUB_WORKSPACE
+          Write-Host "2"
+          ls (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler')
+          Write-Host "3"
+          ls (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'temp')
+
+
+
           # Load used functions
           . (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' '.github' 'scripts' 'Set-EnvironmentOnAgent.ps1')
 
@@ -68,6 +77,7 @@ jobs:
           Write-Verbose "Pester tests output: $outputPath" -Verbose
           Write-Output ('{0}={1}' -f 'outputPath', $outputPath) >> $env:GITHUB_OUTPUT
 
+          return
           $null = Import-Module (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'AzureAPICrawler.psm1')
 
           # --------------------- #
@@ -106,6 +116,7 @@ jobs:
           Write-Verbose "Pester tests output: $outputPath" -Verbose
           Write-Output ('{0}={1}' -f 'outputPath', $outputPath) >> $env:GITHUB_OUTPUT
 
+          return
           $null = Import-Module (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'AzureAPICrawler.psm1')
 
           # --------------------- #
