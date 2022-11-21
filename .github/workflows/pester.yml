@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-20.04
     name: '[Get-AzureAPISpecsVersionList] validation'
     steps:
+      # [Checkout] task(s)
+      # ---------------
       - name: 'Checkout AzureAPICrawler'
         uses: actions/checkout@v3
         with:
@@ -24,30 +26,44 @@ jobs:
           fetch-depth: 0
           repository: Azure/ResourceModules
           path: ResourceModules
+      - name: Checkout Azure API specs
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          repository: Azure/azure-rest-api-specs
+          path: AzureAPICrawler/temp
 
-      - name: 'Run API List utility'
-        id: pester_api_util
+      # [Setup] task(s)
+      # ---------------
+      - name: 'Setup agent'
         shell: pwsh
         run: |
-          $SpecsFilePath = Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'apiSpecsList.json'
-          $null = Import-Module (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'AzureAPICrawler.psm1')
+          # Load used functions
+          . (Join-Path $env:GITHUB_WORKSPACE '.github' 'scripts' 'Set-EnvironmentOnAgent.ps1')
 
-          # Fetch data
-          $res = Get-AzureAPISpecsVersionList -IncludePreview -Verbose
-          $fileContent = $res | ConvertTo-Json
+          # Define PS modules to install on the runner
+          $Modules = @(
+              @{ Name = 'Az.Accounts' },
+              @{ Name = 'Az.Resources' }
+          )
 
-          # Set content
-          if (-not (Test-Path $SpecsFilePath)) {
-            $null = New-Item -Path $SpecsFilePath -Force -Value $fileContent
-          } else {
-            $null = Set-Content -Path $SpecsFilePath -Value $fileContent -Force
-          }
+          # Set agent up
+          Set-EnvironmentOnAgent -PSModules $Modules
 
-      - name: 'Run tests'
-        id: pester_run_step
+      - name: Azure Login
+        uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: true
+
+      # [Test] task(s)
+      # ---------------
+      # Get-AzureAPISpecsVersionList Tests
+      - name: 'Run [Get-AzureAPISpecsVersionList] tests'
+        id: pester_run_step_getVersionListTestResults
         shell: pwsh
         run: |
-          $outputPath = Join-Path $env:GITHUB_WORKSPACE 'getVersionListtestResults.xml'
+          $outputPath = Join-Path $env:GITHUB_WORKSPACE 'getVersionListTestResults.xml'
           Write-Verbose "Pester tests output: $outputPath" -Verbose
           Write-Output ('{0}={1}' -f 'outputPath', $outputPath) >> $env:GITHUB_OUTPUT
 
@@ -76,42 +92,14 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
-          junit_files: '${{ steps.pester_run_step.outputs.outputPath }}'
+          junit_files: '${{ steps.pester_run_step_getVersionListTestResults.outputs.outputPath }}'
 
-  job_pester_GetData:
-    runs-on: ubuntu-20.04
-    name: '[Get-AzureAPISpecsData] validation'
-    steps:
-      - name: 'Checkout AzureAPICrawler'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      # [Setup] task(s)
-      # ---------------
-      - name: 'Setup agent'
-        shell: pwsh
-        run: |
-          # Load used functions
-          . (Join-Path $env:GITHUB_WORKSPACE '.github' 'scripts' 'Set-EnvironmentOnAgent.ps1')
-
-          # Define PS modules to install on the runner
-          $Modules = @(
-              @{ Name = 'Az.Accounts' },
-              @{ Name = 'Az.Resources' }
-          )
-
-          # Set agent up
-          Set-EnvironmentOnAgent -PSModules $Modules
-      - name: Azure Login
-        uses: Azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-          enable-AzPSSession: true
+      # Get-AzureAPISpecsData Tests
       - name: 'Run tests'
-        id: pester_run_step
+        id: pester_run_step_getDataTestResults
         shell: pwsh
         run: |
-          $outputPath = Join-Path $env:GITHUB_WORKSPACE 'getDatatestResults.xml'
+          $outputPath = Join-Path $env:GITHUB_WORKSPACE 'getDataTestResults.xml'
           Write-Verbose "Pester tests output: $outputPath" -Verbose
           Write-Output ('{0}={1}' -f 'outputPath', $outputPath) >> $env:GITHUB_OUTPUT
 
@@ -139,4 +127,4 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
-          junit_files: '${{ steps.pester_run_step.outputs.outputPath }}'
+          junit_files: '${{ steps.pester_run_step_getDataTestResults.outputs.outputPath }}'

@@ -1,13 +1,9 @@
 param (
     [Parameter(Mandatory = $true)]
-    [string] $SpecsFilePath,
-
-    [Parameter(Mandatory = $true)]
     [string] $ResourceModulesFilePath
 )
 
 $templateFilePaths = (Get-ChildItem -Path (Join-Path $ResourceModulesFilePath 'modules') -Filter 'deploy.bicep' -Recurse).FullName
-$availableAPIVersions = Get-Content -Path $SpecsFilePath -Raw | ConvertFrom-Json -Depth 10
 
 $testCases = [System.Collections.ArrayList]@()
 foreach ($templateFilePath in $templateFilePaths) {
@@ -36,22 +32,21 @@ foreach ($templateFilePath in $templateFilePaths) {
                 providerNamespace    = $providerNamespace
                 resourceType         = $resourceType
                 apiVersion           = $apiVersion
-                availableAPIVersions = $availableAPIVersions
             }
         }
     }
 }
 
+BeforeAll {
+    $availableAPIVersions = Get-AzureAPISpecsVersionList -IncludePreview -Verbose -KeepArtifacts | ConvertTo-Json | ConvertFrom-Json
+    if (-not $availableAPIVersions) {
+        throw "Fetch of API versions failed"
+    }
+}
+
 Describe "Test API version availablity" {
 
-    It "Resource Type [<providerNamespace>/<resourceType>] was found with API Version [<apiVersion>]" -TestCases $testCases {
-
-        param(
-            [string] $providerNamespace,
-            [string]  $resourceType,
-            [string]  $apiVersion,
-            [PSCustomObject] $availableAPIVersions
-        )
+    It "Resource Type [<providerNamespace>/<resourceType>] was found with API Version [<apiVersion>]" -ForEach $testCases {
 
         # Provider Namespace test
         ($availableAPIVersions | Get-Member -Type NoteProperty).Name  | Should -Contain $providerNamespace
