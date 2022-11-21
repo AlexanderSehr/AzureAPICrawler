@@ -31,7 +31,7 @@ jobs:
         with:
           fetch-depth: 0
           repository: Azure/azure-rest-api-specs
-          path: AzureAPICrawler/temp
+          path: AzureAPICrawler/temp/azure-rest-api-specs
 
       # [Setup] task(s)
       # ---------------
@@ -44,8 +44,6 @@ jobs:
           ls (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler')
           Write-Host "3"
           ls (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'temp')
-
-
 
           # Load used functions
           . (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' '.github' 'scripts' 'Set-EnvironmentOnAgent.ps1')
