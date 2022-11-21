@@ -61,6 +61,7 @@ jobs:
       # Get-AzureAPISpecsVersionList Tests
       - name: 'Run [Get-AzureAPISpecsVersionList] tests'
         id: pester_run_step_getVersionListTestResults
+        if: always()
         shell: pwsh
         run: |
           $outputPath = Join-Path $env:GITHUB_WORKSPACE 'getVersionListTestResults.xml'
@@ -73,7 +74,6 @@ jobs:
           Invoke-Pester -Configuration @{
             Run        = @{
                 Container = New-PesterContainer -Path (Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'tests' 'Get-AzureAPISpecsVersionList.Tests.ps1') -Data @{
-                  SpecsFilePath           = Join-Path $env:GITHUB_WORKSPACE 'AzureAPICrawler' 'apiSpecsList.json'
                   ResourceModulesFilePath = Join-Path $env:GITHUB_WORKSPACE 'ResourceModules'
               }
             }
@@ -95,8 +95,9 @@ jobs:
           junit_files: '${{ steps.pester_run_step_getVersionListTestResults.outputs.outputPath }}'
 
       # Get-AzureAPISpecsData Tests
-      - name: 'Run tests'
+      - name: 'Run [Get-AzureAPISpecsData] tests'
         id: pester_run_step_getDataTestResults
+        if: always()
         shell: pwsh
         run: |
           $outputPath = Join-Path $env:GITHUB_WORKSPACE 'getDataTestResults.xml'
