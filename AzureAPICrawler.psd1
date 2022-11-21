@@ -107,8 +107,9 @@
             # IconUri = ''
 
             # ReleaseNotes of this module
-            ReleaseNotes = 'Improved check whether a resource is a "singleton" (i.e., can only be deployed once in the current scope).
-For more information, please refer to the official docs at: https://github.com/AlexanderSehr/AzureAPICrawler.'
+            ReleaseNotes = '* Improved check whether a resource is a "singleton" (i.e., can only be deployed once in the current scope).
+
+            For more information, please refer to the official docs at: https://github.com/AlexanderSehr/AzureAPICrawler.'
 
             # Prerelease string of this module
             # Prerelease = ''
