@@ -12,7 +12,7 @@
     RootModule           = 'AzureAPICrawler.psm1'
 
     # Version number of this module.
-    ModuleVersion        = '0.1.2'
+    ModuleVersion        = '0.1.3'
 
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -107,7 +107,7 @@
             # IconUri = ''
 
             # ReleaseNotes of this module
-            ReleaseNotes = 'This is the initial release for the AzureAPICrawler utility, indended to help consumers to fetch the latest and greates Provider-releated information from the azure-rest-api-specs repository.
+            ReleaseNotes = 'Improved check whether a resource is a "singleton" (i.e., can only be deployed once in the current scope).
 For more information, please refer to the official docs at: https://github.com/AlexanderSehr/AzureAPICrawler.'
 
             # Prerelease string of this module
