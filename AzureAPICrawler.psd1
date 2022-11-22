@@ -12,7 +12,7 @@
     RootModule           = 'AzureAPICrawler.psm1'
 
     # Version number of this module.
-    ModuleVersion        = '0.1.3'
+    ModuleVersion        = '0.2.0'
 
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -107,7 +107,7 @@
             # IconUri = ''
 
             # ReleaseNotes of this module
-            ReleaseNotes = '* Improved check whether a resource is a "singleton" (i.e., can only be deployed once in the current scope).
+            ReleaseNotes = '* Updated output of [Get-AzureAPISpecsData] function to Hashtable and only properties that will be surfaced by the utilities (e.g., not outputs/resources, etc.).
 
             For more information, please refer to the official docs at: https://github.com/AlexanderSehr/AzureAPICrawler.'
 
