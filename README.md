@@ -17,8 +17,6 @@ Use this utility to get detailed information of a provided ProviderNamespace-Res
 
 ---
 
-> Note: This utility is related to the [CARML](https://aka.ms/CARML) repository. Hence this may returns additional information you may not find useful (for example, the file content for a module's RBAC deployment).
-
 ## `Get-AzureAPISpecsData`: Usage
 - Import the module using the command `Import-Module './utilities/tools/AzureAPICrawler/AzureAPICrawler.psm1' -Force -Verbose`
 - Invoke its primary function using the command `Get-AzureAPISpecsData -ProviderNamespace '<ProviderNamespace>' -ResourceType '<ResourceType>' -Verbose -KeepArtifacts`
