@@ -114,18 +114,16 @@ Describe "Test Provider Details" {
         }
         
         It "All expected identifiers found" {
-            $missingIdentifiers = $expectedIdentifier | Where-Object { $_ -notin $foundData.identifier }
+            $missingIdentifiers = $expectedIdentifier | Where-Object { $_ -notin $foundData.Keys }
             $missingIdentifiers | Should -BeNullOrEmpty
         }
 
         It "Should be correctly identified as a singleton" {
-            $primaryResource = $foundData | Where-Object { $_.identifier -like ("*{0}" -f $ResourceType) }
-            $primaryResource.data.isSingleton | Should -Be $IsSingleton
+            $foundData[("$ProviderNamespace/$ResourceType")].data.isSingleton | Should -Be $IsSingleton
         }
 
         It "should find parameters as expected" {
-            $primaryResource = $foundData | Where-Object { $_.identifier -like ("*{0}" -f $ResourceType) }
-            $foundParameters = $primaryResource.data.parameters
+            $foundParameters =  $foundData[("$ProviderNamespace/$ResourceType")].data.parameters
 
             foreach($expectedParameter in $ExpectedParameters) {
 

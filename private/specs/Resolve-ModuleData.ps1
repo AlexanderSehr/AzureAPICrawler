@@ -69,65 +69,30 @@ function Resolve-ModuleData {
         }
     }
 
+    $diagnosticOptions = Get-DiagnosticOptionsList -ProviderNamespace $ProviderNamespace -ResourceType $ResourceType
+
     $moduleData = @{
-        parameters           = $filteredList
-        additionalParameters = @()
-        resources            = @()
-        modules              = @()
-        variables            = @()
-        outputs              = @()
-        additionalFiles      = @()
+        parameters               = $filteredList
+        diagnosticMetricsOptions = $diagnosticOptions.metrics
+        diagnosticLogsOptions    = $diagnosticOptions.logs
+        roleAssignmentOptions    = Get-RoleAssignmentsList -ProviderNamespace $ProviderNamespace -ResourceType $ResourceType
+        supportsLocks            = Get-SupportsLock -UrlPath $UrlPath
+        supportsPrivateEndpoints = Get-SupportsPrivateEndpoint -JSONFilePath $JSONFilePath -UrlPath $UrlPath
     }
 
-    #################################
-    ##   Collect additional data   ##
-    #################################
-
-    # Set diagnostic data
-    $diagInputObject = @{
-        ProviderNamespace = $ProviderNamespace
-        ResourceType      = $ResourceType
-        ModuleData        = $ModuleData
-    }
-    Set-DiagnosticModuleData @diagInputObject
-
-    # Set Endpoint data
-    $endpInputObject = @{
-        UrlPath      = $UrlPath
-        JSONFilePath = $JSONFilePath
-        ResourceType = $ResourceType
-        ModuleData   = $ModuleData
-    }
-    Set-PrivateEndpointModuleData @endpInputObject
-
-    ## Set RBAC data
-    $rbacInputObject = @{
-        ProviderNamespace = $ProviderNamespace
-        ResourceType      = $ResourceType
-        ModuleData        = $ModuleData
-        ServiceAPIVersion = Split-Path (Split-Path $JSONFilePath -Parent) -Leaf
-    }
-    Set-RoleAssignmentsModuleData @rbacInputObject
-
-    ## Set Locks data
-    $lockInputObject = @{
-        UrlPath      = $UrlPath
-        ResourceType = $ResourceType
-        ModuleData   = $ModuleData
-    }
-    Set-LockModuleData @lockInputObject
-    
     # Check if there can be mutliple instances of the current Resource Type. 
     # For example, this is 'true' for Resource Type 'Microsoft.Storage/storageAccounts/blobServices/containers', and 'false' for Resource Type 'Microsoft.Storage/storageAccounts/blobServices' 
     $listUrlPath = (Split-Path $UrlPath -Parent) -replace '\\', '/'
 
-    if($specificationData.paths[$listUrlPath].get.Keys -contains 'x-ms-pageable') {
-        if([String]::IsNullOrEmpty($specificationData.paths[$listUrlPath]['get']['x-ms-pageable']['nextLinkName'])) {
+    if ($specificationData.paths[$listUrlPath].get.Keys -contains 'x-ms-pageable') {
+        if ([String]::IsNullOrEmpty($specificationData.paths[$listUrlPath]['get']['x-ms-pageable']['nextLinkName'])) {
             $moduleData['isSingleton'] = $true
-        } else {
+        }
+        else {
             $moduleData['isSingleton'] = $false
         }
-    } else {
+    }
+    else {
         $moduleData['isSingleton'] = $true
     }
 

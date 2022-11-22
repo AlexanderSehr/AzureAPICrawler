@@ -34,15 +34,13 @@ Get the Storage Account resource data (and the one of all its child-resources)
 $out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
 
 # The object looks somewhat like:
-# Name                           Value
-# ----                           -----
-# data                           {outputs, parameters, resources, variables…}
-# identifier                     Microsoft.Storage/storageAccounts
-# metadata                       {parentUrlPath, urlPath}
-#
-# data                           {outputs, parameters, resources, variables…}
-# identifier                     Microsoft.Storage/storageAccounts/localUsers
-# metadata                       {parentUrlPath, urlPath}
+# Name                                                                           Value
+# ----                                                                           -----
+# Microsoft.Storage/storageAccounts/tableServices/tables                         {[data, System.Collections.Hashtable], [metadata, System.Collections.Hashtable]}
+# Microsoft.Storage/storageAccounts/encryptionScopes                             {[data, System.Collections.Hashtable], [metadata, System.Collections.Hashtable]}
+# Microsoft.Storage/storageAccounts/blobServices/containers                      {[data, System.Collections.Hashtable], [metadata, System.Collections.Hashtable]}
+# Microsoft.Storage/storageAccounts/tableServices                                {[data, System.Collections.Hashtable], [metadata, System.Collections.Hashtable]}
+# ...
 ```
 
 ### Example 2
@@ -51,15 +49,14 @@ Filter the list down to only the Storage Account itself
 
 ```PowerShell
 $out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
-$storageAccountResource = $out | Where-Object { $_.identifier -eq 'Microsoft.Storage/storageAccounts' }
+$storageAccountResource = $out['Microsoft.Storage/storageAccounts']
 
 # Returns:
 # --------
 # Name                           Value
 # ----                           -----
-# metadata                       {[jsonFilePath, C:\dev\azure-rest-api-specs\specification\storage\resource-manager\Microsoft.Storage\stable\2022-09-01\storage.json], [parentUrlPa… 
-# data                           {[additionalFiles, System.Object[]], [resources, System.Object[]], [additionalParameters, System.Object[]], [variables, System.Object[]]…}
-# identifier                     Microsoft.Storage/storageAccounts
+# data                           {[supportsLocks, True], [supportsPrivateEndpoints, True], [diagnosticLogsOptions, System.Object[]], [parameters, System.Object[]]…}
+# metadata                       {[urlPath, /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}], [jsonFilePath, C:\dev\AzureAPICrawler\temp\a… 
 ```
 
 ### Example 3
@@ -68,7 +65,7 @@ Print a simple outline similar to the Azure Resource reference:
 
 ```PowerShell
 $out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
-$storageAccountResource = $out | Where-Object { $_.identifier -eq 'Microsoft.Storage/storageAccounts' }
+$storageAccountResource = $out['Microsoft.Storage/storageAccounts']
 $storageAccountResource.data.parameters | ForEach-Object { '{0}{1}:{2}' -f ('  ' * $_.level), $_.name, $_.type  } 
 
 # Returns:
@@ -92,7 +89,7 @@ Filter parameters down to those containing the keyword 'network' and format the 
 
 ```PowerShell
 $out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
-$storageAccountResource = $out | Where-Object { $_.identifier -eq 'Microsoft.Storage/storageAccounts' }
+$storageAccountResource = $out['Microsoft.Storage/storageAccounts']
 $storageAccountResource.data.parameters | Where-Object { $_.description -like "*network*" } | ConvertTo-Json
 
 # Returns:
@@ -128,7 +125,7 @@ Use the Grid-View to enable dynamic UI processing using a table format
 
 ```PowerShell
 $out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
-$storageAccountResource = $out | Where-Object { $_.identifier -eq 'Microsoft.Storage/storageAccounts' }
+$storageAccountResource = $out['Microsoft.Storage/storageAccounts']
 $storageAccountResource.data.parameters | Where-Object { 
   $_.type -notin @('object','array') 
 } | ForEach-Object { 
@@ -151,11 +148,10 @@ $out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccount
 
 # Returns:
 # --------
-# Name                           Value
-# ----                           -----
-# metadata                       {[jsonFilePath, C:\dev\azure-rest-api-specs\specification\storage\resource-manager\Microsoft.Storage\stable\2022-09-01\containers.json], [parentUrlPa… 
-# data                           {[additionalFiles, System.Object[]], [resources, System.Object[]], [additionalParameters, System.Object[]], [variables, System.Object[]]…}
-# identifier                     Microsoft.Storage/storageAccounts/containers
+# Name                                                                           Value
+# ----                                                                           -----
+# Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies {[data, System.Collections.Hashtable], [metadata, System.Collections.Hashtable]}
+# Microsoft.Storage/storageAccounts/blobServices/containers                      {[data, System.Collections.Hashtable], [metadata, System.Collections.Hashtable]}
 ```
 
 ### Example 7
@@ -163,11 +159,11 @@ $out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccount
 Check if a specific resource type supports Locks
 
 ```PowerShell
-$out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
-$out | Foreach-Object { 
+$out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
+$out.Keys | Foreach-Object { 
   [PSCustomObject]@{
-    Name         = $_.identifier
-    'Supports Lock' = $_.data.additionalParameters.name -contains 'lock' 
+    Name         = $_
+    'Supports Lock' = $out[$_].data.supportsLocks 
   }
 } | Sort-Object -Property 'Name'
 
@@ -175,8 +171,11 @@ $out | Foreach-Object {
 # --------
 # Name                                                                           Supports Lock
 # ----                                                                           -------------
+# Microsoft.Storage/storageAccounts                                                       True
+# Microsoft.Storage/storageAccounts/blobServices                                         False
 # Microsoft.Storage/storageAccounts/blobServices/containers                              False
 # Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies         False
+# ...
 ```
 
 ### Example 8
@@ -184,11 +183,11 @@ $out | Foreach-Object {
 Check if a specific resource type supports Private Endpoints
 
 ```PowerShell
-$out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
-$out | Foreach-Object { 
+$out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
+$out.Keys | Foreach-Object { 
   [PSCustomObject]@{
-    Name = $_.identifier
-    'Supports Private Endpoints' = $_.data.additionalParameters.name -contains 'privateEndpoints' 
+    Name                         = $_
+    'Supports Private Endpoints' = $out[$_].data.supportsPrivateEndpoints 
   }
 } | Sort-Object -Property 'Name'
 
@@ -196,8 +195,12 @@ $out | Foreach-Object {
 # --------
 # Name                                                                           Supports Private Endpoints
 # ----                                                                           --------------------------
+# Microsoft.Storage/storageAccounts                                                                    True
+# Microsoft.Storage/storageAccounts/blobServices                                                      False
 # Microsoft.Storage/storageAccounts/blobServices/containers                                           False
 # Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies                      False
+# Microsoft.Storage/storageAccounts/encryptionScopes                                                  False
+# ...
 ```
 
 ### Example 9
@@ -205,20 +208,26 @@ $out | Foreach-Object {
 Check if a specific resource type supports Diagnostic Settings
 
 ```PowerShell
-$out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
-$out | Foreach-Object { 
+$out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
+$out.Keys | Foreach-Object { 
   [PSCustomObject]@{
-    Name = $_.identifier
-    'Supports Diagnostic Settings' = $_.data.additionalParameters.name -contains 'diagnosticWorkspaceId' 
+    Name      = $_
+    'Logs'    = $out[$_].data.diagnosticLogsOptions.Count -gt 0 ? 'Yes' : 'No'
+    'Metrics' = $out[$_].data.diagnosticMetricsOptions.Count -gt 0 ? 'Yes' : 'No'
   }
 } | Sort-Object -Property 'Name'
 
 # Returns:
 # --------
-# Name                                                                           Supports Diagnostic Settings
-# ----                                                                           ----------------------------
-# Microsoft.Storage/storageAccounts/blobServices/containers                                             False
-# Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies                        False
+# Name                                                                           Logs Metrics
+# ----                                                                           ---- -------
+# Microsoft.Storage/storageAccounts                                              Yes  Yes
+# Microsoft.Storage/storageAccounts/blobServices                                 Yes  Yes
+# Microsoft.Storage/storageAccounts/blobServices/containers                      No   No
+# Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies No   No
+# ...
+#
+# NOTE: We also surface settings for Resource Types that you may not be able to configure individually, even though they'd be available.
 ```
 
 ### Example 10
@@ -227,19 +236,24 @@ Check if a specific resource type supports RBAC
 
 ```PowerShell
 $out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
-$out | Foreach-Object { 
+$out.Keys | Foreach-Object { 
   [PSCustomObject]@{
-    Name = $_.identifier
-    'Supports Role Assignments' = $_.data.additionalParameters.name -contains 'roleAssignments' 
+    Name              = $_
+    'Roles for scope' = $out[$_].data.roleAssignmentOptions.Count -gt 0
   }
 } | Sort-Object -Property 'Name'
 
 # Returns:
 # --------
-# Name                                                                           Supports Role Assignments
-# ----                                                                           -------------------------
-# Microsoft.Storage/storageAccounts/blobServices/containers                                           True
-# Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies                      True
+# Name                                                                           Roles for scope
+# ----                                                                           ---------------
+# Microsoft.Storage/storageAccounts                                                         True
+# Microsoft.Storage/storageAccounts/blobServices                                            True
+# Microsoft.Storage/storageAccounts/blobServices/containers                                 True
+# Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies           False
+# ...
+#
+# NOTE: We also surface roles for Resource Types that you may not be able to configure individually, even though they'd be available.
 ```
 
 ### Example 11
@@ -248,22 +262,18 @@ Get the RBAC roles that apply to a given Resource Type (if any)
 
 ```PowerShell
 $out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts/blobServices/containers' -Verbose -KeepArtifacts
-(($out | Where-Object { 
-  $_.identifier -eq 'Microsoft.Storage/storageAccounts/blobServices/containers' 
-}).data.additionalFiles | Where-Object { 
-  $_.type -eq 'roleAssignments' 
-}).onlyRoleDefinitionNames
+$out['Microsoft.Storage/storageAccounts/blobServices/containers'].data.roleAssignmentOptions | ConvertTo-Json | ConvertFrom-Json
 
 # Returns:
 # --------
-# Avere Contributor
-# Avere Contributor
-# Avere Operator
-# Avere Operator
-# Backup Contributor
-# Backup Operator
-# Contributor
-# Desktop Virtualization Virtual Machine Contributor
+# Name                                               Id
+# ----                                               --
+# Avere Contributor                                  4f8fab4f-1852-4a58-a46a-8eaf358af14a
+# Avere Operator                                     c025889f-8102-4ebf-b32c-fc0c6f0c6bd9
+# Backup Contributor                                 5e467623-bb1f-42f4-a55d-6e525e11384b
+# Backup Operator                                    00c29273-979b-4161-815c-10b084fb9324
+# Contributor                                        b24988ac-6180-42a0-ab88-20f7382dd24c
+# ...
 ``` 
 
 ### Example 12
@@ -272,39 +282,37 @@ Get an overview of which resource type supports which extension resource (e.g. P
 
 ```PowerShell
 $out = Get-AzureAPISpecsData -FullResourceType 'Microsoft.Storage/storageAccounts' -Verbose -KeepArtifacts
-$out | Foreach-Object { 
+$out.Keys | Foreach-Object { 
   [PSCustomObject]@{
-    Name = $_.identifier
-    'RBAC' = $_.data.additionalParameters.name -contains 'roleAssignments' 
-    'Diagnostic Settings' = $_.data.additionalParameters.name -contains 'diagnosticWorkspaceId' 
-    'Private Endpoints' = $_.data.additionalParameters.name -contains 'privateEndpoints' 
-    'Lock' = $_.data.additionalParameters.name -contains 'lock' 
+    Name = $_
+    'RBAC'                = $out[$_].data.roleAssignmentOptions.count -gt 0 
+    'Diagnostic Settings' = $out[$_].data.diagnosticMetricsOptions.Count -gt 0 -or $out[$_].data.diagnosticLogsOptions.Count -gt 0
+    'Private Endpoints'   = $out[$_].data.supportsPrivateEndpoints 
+    'Lock'                = $out[$_].data.supportsLocks
   }
 } | Sort-Object -Property 'Name' | Format-Table
 
 # Returns:
 # --------
-# Name                                                                            RBAC Diagnostic Settings Private Endpoints Locks
-# ----                                                                            ---- ------------------- ----------------- -----
+# Name                                                                            RBAC Diagnostic Settings Private Endpoints  Lock
+# ----                                                                            ---- ------------------- -----------------  ----
 # Microsoft.Storage/storageAccounts                                               True                True              True  True
 # Microsoft.Storage/storageAccounts/blobServices                                  True                True             False False
 # Microsoft.Storage/storageAccounts/blobServices/containers                       True               False             False False
 # Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies False               False             False False
-# Microsoft.Storage/storageAccounts/encryptionScopes                             False               False              True False
-# Microsoft.Storage/storageAccounts/fileServices                                 False                True             False False
+# Microsoft.Storage/storageAccounts/encryptionScopes                             False               False             False False
+# Microsoft.Storage/storageAccounts/fileServices                                  True                True             False False
 # Microsoft.Storage/storageAccounts/fileServices/shares                          False               False             False False
-# Microsoft.Storage/storageAccounts/inventoryPolicies                            False               False              True False
-# Microsoft.Storage/storageAccounts/localUsers                                   False               False              True False
-# Microsoft.Storage/storageAccounts/managementPolicies                           False               False              True False
-# Microsoft.Storage/storageAccounts/objectReplicationPolicies                     True               False              True False
-# Microsoft.Storage/storageAccounts/privateEndpointConnections                   False               False              True False
+# Microsoft.Storage/storageAccounts/inventoryPolicies                            False               False             False False
+# Microsoft.Storage/storageAccounts/localUsers                                   False               False             False False
+# Microsoft.Storage/storageAccounts/managementPolicies                           False               False             False False
+# Microsoft.Storage/storageAccounts/objectReplicationPolicies                     True               False             False False
+# Microsoft.Storage/storageAccounts/privateEndpointConnections                   False               False             False False
 # Microsoft.Storage/storageAccounts/queueServices                                 True                True             False False
 # Microsoft.Storage/storageAccounts/queueServices/queues                          True               False             False False
 # Microsoft.Storage/storageAccounts/tableServices                                 True                True             False False
 # Microsoft.Storage/storageAccounts/tableServices/tables                          True               False             False False
 ```
-
-
 
 ## `Get-AzureAPISpecsData`: Notes
 
@@ -322,13 +330,13 @@ $out | Foreach-Object {
 ## `Get-AzureAPISpecsData`: Known issues
 
 ### Diagnostic Settings
-The data source which is the basis for the Diagnostic Logs & Metrics is not 100% reliable
+The data source which is the basis for the Diagnostic Logs & Metrics is not 100% reliable. Also, they are not a guaranteed indicator that you'll be able to set them in the service's diagnostic settings.
 
 ### Locks
-The data source for Locks is not 100% reliable. Currently it is assumed that all top-level resources besides those in the Authorization Namespace support locks
+The data source for Locks is not 100% reliable. Currently it is assumed that all top-level resources besides those in the Authorization Namespace support locks.
 
 ### RBAC
-The logic to determine if a resource supports RBAC also includes resources that 'could' have roles (as per their resource type) but actually don't support them (e.g., `Microsoft.Storage/storageAccounts/blobServices`).
+The logic to determine if a resource supports RBAC also includes resources that 'could' have roles (as per their resource type) but actually don't support their configuration (e.g., `Microsoft.Storage/storageAccounts/blobServices`).
 
 </details>
 

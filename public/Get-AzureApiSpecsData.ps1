@@ -86,7 +86,7 @@ function Get-AzureAPISpecsData {
             #################################################################
             #   Iterate through parent & child-paths and extract the data   #
             #################################################################
-            $moduleData = @()
+            $moduleData = @{}
             foreach ($pathBlock in $pathData) {
                 # Calculate simplified identifier
                 $identifier = ($pathBlock.urlPath -split '\/providers\/')[1]
@@ -108,13 +108,12 @@ function Get-AzureAPISpecsData {
                     UrlPath      = $pathBlock.urlPath
                     ResourceType = $identifier -replace "$ProviderNamespace/", '' # Using pathBlock-based identifier to support also child-resources
                 }
-                $resolvedParameters = Resolve-ModuleData @resolveInputObject
+                $resolvedData = Resolve-ModuleData @resolveInputObject
 
                 # Build result
-                $moduleData += @{
-                    data       = $resolvedParameters
-                    identifier = $identifier
-                    metadata   = @{
+                $moduleData[$identifier] = @{
+                    data     = $resolvedData
+                    metadata = @{
                         urlPath       = $pathBlock.urlPath
                         jsonFilePath  = $pathBlock.jsonFilePath
                         parentUrlPath = $pathBlock.parentUrlPath

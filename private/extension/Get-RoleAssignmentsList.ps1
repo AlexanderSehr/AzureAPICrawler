@@ -18,7 +18,14 @@ Optional. Whether to include custom roles or not
 .EXAMPLE
 Get-RoleAssignmentsList -ProviderNamespace 'Microsoft.KeyVault' -ResourceType 'vaults'
 
-Fetch all available Role Definitions for ProviderNamespace [Microsoft.KeyVault/vaults], excluding custom roles
+Fetch all available Role Definitions for ProviderNamespace [Microsoft.KeyVault/vaults], excluding custom roles.
+
+Example output:
+# Name                                               Id
+# ----                                               --
+# Avere Contributor                                  4f8fab4f-1852-4a58-a46a-8eaf358af14a
+# Avere Operator                                     c025889f-8102-4ebf-b32c-fc0c6f0c6bd9
+# Backup Contributor                                 5e467623-bb1f-42f4-a55d-6e525e11384b
 #>
 function Get-RoleAssignmentsList {
 
@@ -71,19 +78,12 @@ function Get-RoleAssignmentsList {
             $_.DataActions -like '`**'
         }
 
-        $resBicep = [System.Collections.ArrayList]@()
-        $resArm = [System.Collections.ArrayList]@()
-        foreach ($role in $relevantRoles | Sort-Object -Property 'Name' -Unique) {
-            $resBicep += "'{0}': subscriptionResourceId('Microsoft.Authorization/roleDefinitions','{1}')" -f $role.Name, $role.Id
-            $resArm += "`"{0}`": `"[subscriptionResourceId('Microsoft.Authorization/roleDefinitions','{1}')]`"," -f $role.Name, $role.Id
-        }
-
-        return @{
-            bicepFormat             = $resBicep
-            armFormat               = $resArm
-            onlyRoleDefinitionNames = $relevantRoles.name | Sort-Object
-            onlyRoleDefinitionIds   = $relevantRoles.id
-        }
+        return ($relevantRoles | Sort-Object -Property 'Name' -Unique | ForEach-Object { 
+                @{
+                    Name = $_.name
+                    Id   = $_.id
+                }
+            })
     }
 
     end {
