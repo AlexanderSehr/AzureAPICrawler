@@ -1,6 +1,6 @@
 # Azure API Crawler
 
-This module provides you with the ability to fetch data from the API specs.
+This [PowerShell module](https://www.powershellgallery.com/packages/AzureAPICrawler) provides you with the ability to fetch data from the API specs.
 
 <details>
 
