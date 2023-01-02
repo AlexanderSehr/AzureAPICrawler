@@ -11,6 +11,11 @@ Optional. Provide if preview versions should be included
 .PARAMETER KeepArtifacts
 Optional. Provide if any downloaded data should not be removed after the function ran. This is useful to speed up subsequent runs.
 
+.PARAMETER IncludeExternalSources
+Optional. A flag to control whether that found API versions (based on this repository) should be enriched with other sources like those returned by the `Get-AzResourceProvider -ListAvailable` function.
+This is usually benefitial to get a complete picture as it can happen that either are missing individual versions.
+NOTE: This function requires that the `Az.Resources` module is installed.
+
 .EXAMPLE
 Get-AzureAPISpecsVersionList 
 
@@ -45,7 +50,10 @@ function Get-AzureAPISpecsVersionList {
         [switch] $IncludePreview,
 
         [Parameter(Mandatory = $false)]
-        [switch] $KeepArtifacts
+        [switch] $KeepArtifacts,
+
+        [Parameter(Mandatory = $false)]
+        [switch] $IncludeExternalSources
     )
 
     begin {
@@ -164,8 +172,8 @@ function Get-AzureAPISpecsVersionList {
                         #     }
                         # }
 
-                        if($pathParameters.Keys -contains 'enum') {
-                            foreach($elem in $pathParameters.enum) {
+                        if ($pathParameters.Keys -contains 'enum') {
+                            foreach ($elem in $pathParameters.enum) {
                                 $formattedResourceType = $resourceType -replace "\{$pathElemName}", $elem
 
                                 if ($resultSet[$providerNamespace].Keys -notcontains $formattedResourceType) {
@@ -193,7 +201,41 @@ function Get-AzureAPISpecsVersionList {
                 Write-Progress -Activity "Analyzing in progress" -Status ("[{0}/{1}] or {2}% files processed" -f $fileIndex, $filePaths.count, $percentageComplete) -PercentComplete $percentageComplete
             }
 
-            # Order result
+            # Add other sources
+            if ($IncludeExternalSources) {
+                # Further expand on the known API versions with those returned by the official PowerShell function
+                $PSApiVersions = Get-AzResourceProvider -ListAvailable 
+
+                foreach ($providerNamespaceBlock in $PSApiVersions) {
+
+                    $providerNamespace = $providerNamespaceBlock.ProviderNamespace
+
+                    if ($resultSet.Keys -notcontains $providerNamespace) {
+                        $resultSet[$providerNamespace] = @{}
+                    }
+
+                    foreach ($resourceTypeBlock in $providerNamespaceBlock.ResourceTypes) {
+
+                        $resourceType = $resourceTypeBlock.ResourceTypeName
+
+                        if ($resultSet[$providerNamespace].Keys -notcontains $resourceType) {
+                            $resultSet[$providerNamespace][$resourceType] = @()
+                        }
+
+                        if ($IncludePreview) {
+                            $apiVersions = $resourceTypeBlock.ApiVersions
+                        }
+                        else {
+                            $apiVersions = $resourceTypeBlock.ApiVersions | Where-Object { $_ -notlike "*preview*" }
+                        }
+
+                        $apiVersionList = (@() + $resultSet[$providerNamespace][$resourceType] + $apiVersions) | Sort-Object -Unique
+                        $resultSet[$providerNamespace][$resourceType] = $apiVersionList -is [array] ? $apiVersionList : @($apiVersions)
+                    }
+                } 
+            }
+
+            # Sort result
             $orderedResultSet = [ordered]@{}
             foreach ($providerNamespace in ($resultSet.Keys | Sort-Object)) {
                 
@@ -206,7 +248,7 @@ function Get-AzureAPISpecsVersionList {
                 }
             }
 
-            $orderedResultSet
+            return $orderedResultSet
         }
         catch {
             throw ($_, $_.ScriptStackTrace)
