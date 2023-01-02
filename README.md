@@ -396,7 +396,7 @@ $out = Get-AzureAPISpecsVersionList -KeepArtifacts -Verbose -IncludePreview | Co
 
 ### Example 2  
 
-Get all API versions available in the Azure API Specs repository, including preview versions and other external sources (e.g. the `Get-AzResourceProvider`) cmdlet.
+Get all API versions available in the [Azure API Specs](https://github.com/Azure/azure-rest-api-specs) repository, including preview versions and other external sources (e.g. the `Get-AzResourceProvider`) cmdlet.
 
 ```PowerShell
 $out = Get-AzureAPISpecsVersionList -KeepArtifacts -Verbose -IncludePreview -IncludeExternalSources | ConvertTo-Json
