@@ -107,8 +107,7 @@
             # IconUri = ''
 
             # ReleaseNotes of this module
-            ReleaseNotes = '
-            # 1.0.0
+            ReleaseNotes = '# 1.0.0
             * Release version after weeks of testing in production
             * Added capability to fetch additional API versions using external functions
 
