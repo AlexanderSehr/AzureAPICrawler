@@ -38,7 +38,7 @@ foreach ($templateFilePath in $templateFilePaths) {
 }
 
 BeforeAll {
-    $availableAPIVersions = Get-AzureAPISpecsVersionList -IncludePreview -Verbose -KeepArtifacts | ConvertTo-Json | ConvertFrom-Json
+    $availableAPIVersions = Get-AzureAPISpecsVersionList -IncludePreview -Verbose -KeepArtifacts -IncludeExternalSources | ConvertTo-Json | ConvertFrom-Json
     if (-not $availableAPIVersions) {
         throw "Fetch of API versions failed"
     }

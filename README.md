@@ -1,6 +1,6 @@
 # Azure API Crawler
 
-This [PowerShell module](https://www.powershellgallery.com/packages/AzureAPICrawler) provides you with the ability to fetch data from the API specs.
+This [PowerShell module](https://www.powershellgallery.com/packages/AzureAPICrawler) provides you with the ability to fetch data from the [Azure API specs](https://github.com/Azure/azure-rest-api-specs) repository.
 
 <details>
 
@@ -361,10 +361,45 @@ Use this utility to get an overview of all available API versions for any Provid
 
 ### Example 1  
 
-Get the Storage Account resource data (and the one of all its child-resources)
+Get all API versions available in the Azure API Specs repository, including preview versions.
 
 ```PowerShell
 $out = Get-AzureAPISpecsVersionList -KeepArtifacts -Verbose -IncludePreview | ConvertTo-Json
+
+# The object looks somewhat like:
+# {
+#     "Microsoft.AAD": {
+#         "domainServices": [
+#             "2017-01-01",
+#             "2017-06-01",
+#             "2020-01-01",
+#             "2021-03-01",
+#             "2021-05-01",
+#             "2022-09-01"
+#         ],
+#         "domainServices/ouContainer": [
+#             "2017-06-01",
+#             "2020-01-01",
+#             "2021-03-01",
+#             "2021-05-01",
+#             "2022-09-01"
+#         ]
+#     },
+#     "microsoft.aadiam": {
+#         "azureADMetrics": [
+#             "2020-07-01-preview"
+#         ]
+#     },
+#     (..)
+# }
+```
+
+### Example 2  
+
+Get all API versions available in the [Azure API Specs](https://github.com/Azure/azure-rest-api-specs) repository, including preview versions and other external sources (e.g. the `Get-AzResourceProvider`) cmdlet.
+
+```PowerShell
+$out = Get-AzureAPISpecsVersionList -KeepArtifacts -Verbose -IncludePreview -IncludeExternalSources | ConvertTo-Json
 
 # The object looks somewhat like:
 # {
