@@ -107,14 +107,16 @@
             # IconUri = ''
 
             # ReleaseNotes of this module
-            ReleaseNotes = '# 1.0.0
-            * Release version after weeks of testing in production
-            * Added capability to fetch additional API versions using external functions
+            ReleaseNotes = '
+# 1.0.0
+* Release version after weeks of testing in production
+* Added capability to fetch additional API versions using external functions
 
-            # 0.2.0
-            * Updated output of [Get-AzureAPISpecsData] function to Hashtable and only properties that will be surfaced by the utilities (e.g., not outputs/resources, etc.).
+# 0.2.0
+* Updated output of [Get-AzureAPISpecsData] function to Hashtable and only properties that will be surfaced by the utilities (e.g., not outputs/resources, etc.).
 
-            For more information, please refer to the official docs at: https://github.com/AlexanderSehr/AzureAPICrawler.'
+For more information, please refer to the official docs at: https://github.com/AlexanderSehr/AzureAPICrawler.
+'
 
             # Prerelease string of this module
             # Prerelease = ''
