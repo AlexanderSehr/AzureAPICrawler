@@ -12,6 +12,12 @@ Mandatory. The Provider Namespace to fetch the data for
 .PARAMETER ResourceType
 Mandatory. The Resource Type to fetch the data for
 
+.PARAMETER diagnosticMetricsPath
+Optional. The path to the file containing the mterics data.
+
+.PARAMETER diagnosticLogsPath
+Optional. The path to the file containing the logs data.
+
 .EXAMPLE
 Get-DiagnosticOptionsList -ProviderNamespace 'Microsoft.KeyVault' -ResourceType 'vaults'
 
@@ -21,17 +27,21 @@ function Get-DiagnosticOptionsList {
 
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [string] $ProviderNamespace,
 
-        [Parameter(Mandatory)]
-        [string] $ResourceType
+        [Parameter(Mandatory = $true)]
+        [string] $ResourceType,
+
+        [Parameter(Mandatory = $false)]
+        [string] $diagnosticMetricsPath = (Join-Path $script:temp 'diagnosticMetrics.md'),
+
+        [Parameter(Mandatory = $false)]
+        [string] $diagnosticLogsPath = (Join-Path $script:temp 'diagnosticLogs.md')
     )
 
     begin {
         Write-Debug ('{0} entered' -f $MyInvocation.MyCommand)
-        $diagnosticMetricsPath = Join-Path $script:temp 'diagnosticMetrics.md'
-        $diagnosticLogsPath = Join-Path $script:temp 'diagnosticLogs.md'
     }
 
     process {
@@ -46,8 +56,8 @@ function Get-DiagnosticOptionsList {
         }
         $metricsMarkdown = Get-Content $diagnosticMetricsPath
 
-        # Find provider in file
-        $matchingMetricResourceTypeLine = $metricsMarkdown.IndexOf(($metricsMarkdown -like "## $ProviderNamespace/$ResourceType")[-1])
+        # Find provider in file (Note: It sometimes has excess spaces at the end)
+        $matchingMetricResourceTypeLine = $metricsMarkdown.IndexOf(($metricsMarkdown -match "## $ProviderNamespace\/$ResourceType\s*$")[-1])
 
         if ($matchingMetricResourceTypeLine -gt -1) {
 
@@ -80,10 +90,10 @@ function Get-DiagnosticOptionsList {
             Write-Verbose 'Fetching diagnostic logs data. This may take a moment...' -Verbose
             Invoke-WebRequest -Uri $script:Config.url_MonitoringDocsRepositoryLogsRaw -OutFile $diagnosticLogsPath
         }
-        $logsMarkdown = Get-Content $diagnosticMetricsPath
+        $logsMarkdown = Get-Content $diagnosticLogsPath
 
-        # Find provider in file
-        $matchingLogResourceTypeLine = $logsMarkdown.IndexOf(($logsMarkdown -like "## $ProviderNamespace/$ResourceType")[-1])
+        # Find provider in file (Note: It sometimes has excess spaces at the end)
+        $matchingLogResourceTypeLine = $logsMarkdown.IndexOf(($logsMarkdown -match "## $ProviderNamespace\/$ResourceType\s*$")[-1])
         if ($matchingLogResourceTypeLine -gt -1) {
 
             # Find table
