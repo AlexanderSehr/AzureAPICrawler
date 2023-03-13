@@ -2,6 +2,10 @@
 
 This [PowerShell module](https://www.powershellgallery.com/packages/AzureAPICrawler) provides you with the ability to fetch data from the [Azure API specs](https://github.com/Azure/azure-rest-api-specs) repository.
 
+| Pipeline Status |
+| - |
+| [![Test Utility](https://github.com/AlexanderSehr/AzureAPICrawler/actions/workflows/pester.yml/badge.svg)](https://github.com/AlexanderSehr/AzureAPICrawler/actions/workflows/pester.yml) |
+
 <details>
 
 <summary><code>Get-AzureAPISpecsData</code></summary>
