@@ -46,7 +46,7 @@ BeforeAll {
 
 Describe "Test API version availablity" {
 
-    It "Resource Type [<providerNamespace>/<resourceType>] was found with API Version [<apiVersion>]" -ForEach $testCases {
+    It "Resource Type [<providerNamespace>/<resourceType>] should be found with API Version [<apiVersion>]" -ForEach $testCases {
 
         # Provider Namespace test
         ($availableAPIVersions | Get-Member -Type NoteProperty).Name  | Should -Contain $providerNamespace
